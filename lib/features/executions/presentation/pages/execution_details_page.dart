@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/widgets.dart';
+import '../widgets/widgets.dart';
 import '../providers/execution_providers.dart';
 import '../../domain/models/models.dart';
 
@@ -70,7 +71,8 @@ class ExecutionDetailsPage extends ConsumerWidget {
                       'Status',
                       style: theme.textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
                     ),
-                    _StatusLabel(status: execution.status),
+                    const SizedBox(height: AppLayout.spaceXS),
+                    ExecutionStatusBadge(status: execution.status),
                   ],
                 ),
                 Column(
@@ -127,44 +129,6 @@ class ExecutionDetailsPage extends ConsumerWidget {
         final step = steps[index];
         return _StepTile(step: step);
       },
-    );
-  }
-}
-
-class _StatusLabel extends StatelessWidget {
-  final ExecutionStatus status;
-  const _StatusLabel({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    Color color;
-    String label;
-
-    switch (status) {
-      case ExecutionStatus.pending:
-        color = AppColors.warning;
-        label = 'Pending';
-      case ExecutionStatus.running:
-        color = AppColors.info;
-        label = 'Running';
-      case ExecutionStatus.success:
-        color = AppColors.success;
-        label = 'Success';
-      case ExecutionStatus.failed:
-        color = AppColors.error;
-        label = 'Failed';
-      case ExecutionStatus.cancelled:
-        color = AppColors.textDisabled;
-        label = 'Cancelled';
-    }
-
-    return Text(
-      label,
-      style: theme.textTheme.titleMedium?.copyWith(
-        color: color,
-        fontWeight: FontWeight.bold,
-      ),
     );
   }
 }
