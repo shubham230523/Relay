@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../core/constants/constants.dart';
 import '../features/automations/presentation/pages/automations_page.dart';
 import '../features/workflow_builder/presentation/pages/create_automation_page.dart';
+import '../features/workflow_builder/presentation/pages/workflow_details_page.dart';
 import 'main_shell.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -15,6 +16,11 @@ final appRouter = GoRouter(
       path: AppRoutes.createAutomation,
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const CreateAutomationPage(),
+    ),
+    GoRoute(
+      path: AppRoutes.workflowDetails,
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const WorkflowDetailsPage(),
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
