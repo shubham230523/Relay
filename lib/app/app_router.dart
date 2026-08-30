@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../core/constants/constants.dart';
+import '../features/automations/presentation/pages/automations_page.dart';
 import 'main_shell.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -28,9 +29,7 @@ final appRouter = GoRouter(
           routes: [
             GoRoute(
               path: AppRoutes.automations,
-              builder: (context, state) => const Scaffold(
-                body: Center(child: Text('Automations')),
-              ),
+              builder: (context, state) => const AutomationsPage(),
             ),
           ],
         ),
