@@ -14,15 +14,22 @@ final automationsListProvider = FutureProvider<List<Automation>>((ref) async {
 
 final automationSearchQueryProvider = StateProvider<String>((ref) => '');
 
+final automationStatusFilterProvider = StateProvider<AutomationStatus?>((ref) => null);
+
 final filteredAutomationsProvider = Provider<AsyncValue<List<Automation>>>((ref) {
   final query = ref.watch(automationSearchQueryProvider).toLowerCase();
+  final statusFilter = ref.watch(automationStatusFilterProvider);
   final automationsAsync = ref.watch(automationsListProvider);
 
   return automationsAsync.whenData((automations) {
-    if (query.isEmpty) return automations;
     return automations.where((automation) {
-      return automation.name.toLowerCase().contains(query) ||
+      final matchesQuery = query.isEmpty ||
+          automation.name.toLowerCase().contains(query) ||
           automation.description.toLowerCase().contains(query);
+      
+      final matchesStatus = statusFilter == null || automation.status == statusFilter;
+      
+      return matchesQuery && matchesStatus;
     }).toList();
   });
 });

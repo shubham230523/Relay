@@ -15,6 +15,8 @@ class AutomationsPage extends StatelessWidget {
           AutomationsHeader(),
           SizedBox(height: AppLayout.spaceL),
           AutomationSearchBar(),
+          SizedBox(height: AppLayout.spaceS),
+          AutomationStatusFilter(),
           SizedBox(height: AppLayout.spaceM),
           AutomationsList(),
         ],
