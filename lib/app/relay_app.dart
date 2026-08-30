@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 
+import 'package:relay/core/theme/theme.dart';
+
 class RelayApp extends StatelessWidget {
   const RelayApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: 'Relay',
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
+      theme: AppTheme.lightTheme,
+      home: const Scaffold(
         body: Center(
           child: Text('Relay'),
         ),
