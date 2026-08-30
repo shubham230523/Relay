@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/constants.dart';
 import 'app_colors.dart';
 import 'app_typography.dart';
 
@@ -36,27 +37,30 @@ class AppTheme {
         color: AppColors.surface,
         elevation: 2,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppLayout.cardRadius),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppLayout.screenPadding,
+          vertical: AppLayout.spaceS + AppLayout.spaceXS,
+        ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppLayout.inputRadius),
           borderSide: const BorderSide(color: AppColors.surfaceVariant),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppLayout.inputRadius),
           borderSide: const BorderSide(color: AppColors.surfaceVariant),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppLayout.inputRadius),
           borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppLayout.inputRadius),
           borderSide: const BorderSide(color: AppColors.error),
         ),
         hintStyle: const TextStyle(color: AppColors.textDisabled),
@@ -67,7 +71,7 @@ class AppTheme {
           foregroundColor: Colors.white,
           minimumSize: const Size.fromHeight(48),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppLayout.buttonRadius),
           ),
           elevation: 0,
         ),
@@ -77,7 +81,7 @@ class AppTheme {
           foregroundColor: AppColors.primary,
           minimumSize: const Size.fromHeight(48),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppLayout.buttonRadius),
           ),
           side: const BorderSide(color: AppColors.primary),
         ),
@@ -121,27 +125,30 @@ class AppTheme {
         color: AppColors.surfaceDark,
         elevation: 2,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppLayout.cardRadius),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surfaceDark,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppLayout.screenPadding,
+          vertical: AppLayout.spaceS + AppLayout.spaceXS,
+        ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppLayout.inputRadius),
           borderSide: const BorderSide(color: AppColors.surfaceVariantDark),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppLayout.inputRadius),
           borderSide: const BorderSide(color: AppColors.surfaceVariantDark),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppLayout.inputRadius),
           borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppLayout.inputRadius),
           borderSide: const BorderSide(color: AppColors.error),
         ),
         hintStyle: const TextStyle(color: AppColors.textDisabledDark),
@@ -152,7 +159,7 @@ class AppTheme {
           foregroundColor: Colors.white,
           minimumSize: const Size.fromHeight(48),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppLayout.buttonRadius),
           ),
           elevation: 0,
         ),
@@ -162,7 +169,7 @@ class AppTheme {
           foregroundColor: AppColors.primary,
           minimumSize: const Size.fromHeight(48),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppLayout.buttonRadius),
           ),
           side: const BorderSide(color: AppColors.primary),
         ),
