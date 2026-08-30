@@ -73,9 +73,57 @@ class _CreateAutomationPageState extends State<CreateAutomationPage> {
               },
               child: const Text('Generate Workflow'),
             ),
+            const SizedBox(height: AppLayout.spaceXL),
+            Text(
+              'Not sure where to start?',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: AppLayout.spaceM),
+            Wrap(
+              spacing: AppLayout.spaceS,
+              runSpacing: AppLayout.spaceS,
+              children: [
+                _ExampleChip(
+                  label: 'Summarize important emails every morning',
+                  onTap: () => _controller.text = 'Summarize important emails every morning',
+                ),
+                _ExampleChip(
+                  label: 'Save invoice details from emails into a spreadsheet',
+                  onTap: () => _controller.text = 'Save invoice details from emails into a spreadsheet',
+                ),
+                _ExampleChip(
+                  label: 'Create tasks from calendar meetings',
+                  onTap: () => _controller.text = 'Create tasks from calendar meetings',
+                ),
+                _ExampleChip(
+                  label: 'Send me a daily business summary',
+                  onTap: () => _controller.text = 'Send me a daily business summary',
+                ),
+              ],
+            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ExampleChip extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const _ExampleChip({
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionChip(
+      label: Text(label),
+      onPressed: onTap,
     );
   }
 }
