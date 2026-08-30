@@ -47,6 +47,26 @@ final appRouter = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
+              path: AppRoutes.templates,
+              builder: (context, state) => const Scaffold(
+                body: Center(child: Text('Templates')),
+              ),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: AppRoutes.integrations,
+              builder: (context, state) => const Scaffold(
+                body: Center(child: Text('Integrations')),
+              ),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
               path: AppRoutes.settings,
               builder: (context, state) => const Scaffold(
                 body: Center(child: Text('Settings')),

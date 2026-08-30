@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../core/constants/constants.dart';
+import '../core/widgets/widgets.dart';
 
 class MainShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
@@ -12,23 +13,43 @@ class MainShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Filter items for mobile bottom navigation as requested:
-    // Dashboard, Automations, Executions, Settings
-    final mobileItems = AppNavigation.mainNavigationItems.where((item) {
-      return item.routePath == AppRoutes.dashboard ||
-          item.routePath == AppRoutes.automations ||
-          item.routePath == AppRoutes.executions ||
-          item.routePath == AppRoutes.settings;
-    }).toList();
+    return ResponsiveBuilder(
+      mobile: (context) => _MobileShell(navigationShell: navigationShell),
+      desktop: (context) => _DesktopShell(navigationShell: navigationShell),
+    );
+  }
+}
+
+class _MobileShell extends StatelessWidget {
+  final StatefulNavigationShell navigationShell;
+
+  const _MobileShell({required this.navigationShell});
+
+  @override
+  Widget build(BuildContext context) {
+    // Mobile items: Dashboard, Automations, Executions, Settings
+    // We need to map these to the actual branch indices: 0, 1, 2, 5
+    final mobileItems = [
+      AppNavigation.mainNavigationItems[0], // Dashboard
+      AppNavigation.mainNavigationItems[1], // Automations
+      AppNavigation.mainNavigationItems[2], // Executions
+      AppNavigation.mainNavigationItems[5], // Settings
+    ];
+
+    final branchIndices = [0, 1, 2, 5];
+
+    // Find if current index is in our mobile set
+    int selectedIndex = branchIndices.indexOf(navigationShell.currentIndex);
+    if (selectedIndex == -1) selectedIndex = 0;
 
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: navigationShell.currentIndex,
+        selectedIndex: selectedIndex,
         onDestinationSelected: (index) {
           navigationShell.goBranch(
-            index,
-            initialLocation: index == navigationShell.currentIndex,
+            branchIndices[index],
+            initialLocation: branchIndices[index] == navigationShell.currentIndex,
           );
         },
         destinations: mobileItems.map((item) {
@@ -38,6 +59,34 @@ class MainShell extends StatelessWidget {
             label: item.label,
           );
         }).toList(),
+      ),
+    );
+  }
+}
+
+class _DesktopShell extends StatelessWidget {
+  final StatefulNavigationShell navigationShell;
+
+  const _DesktopShell({required this.navigationShell});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Row(
+        children: [
+          DesktopSidebar(
+            selectedIndex: navigationShell.currentIndex,
+            onDestinationSelected: (index) {
+              navigationShell.goBranch(
+                index,
+                initialLocation: index == navigationShell.currentIndex,
+              );
+            },
+          ),
+          Expanded(
+            child: navigationShell,
+          ),
+        ],
       ),
     );
   }
