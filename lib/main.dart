@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MainApp());
+  runApp(const RelayApp());
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class RelayApp extends StatelessWidget {
+  const RelayApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(body: Center(child: Text('Hello World!'))),
+      home: Scaffold(
+        body: Center(
+          child: Text('Relay'),
+        ),
+      ),
     );
   }
 }
