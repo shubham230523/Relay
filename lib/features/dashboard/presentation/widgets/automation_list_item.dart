@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/theme.dart';
 import '../../domain/models/models.dart';
@@ -17,60 +18,64 @@ class AutomationListItem extends StatelessWidget {
 
     return Card(
       margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(AppLayout.spaceM),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppLayout.spaceS),
-              decoration: BoxDecoration(
-                // ignore: deprecated_member_use
-                color: AppColors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(AppLayout.buttonRadius),
+      child: InkWell(
+        onTap: () => context.push(AppRoutes.automationDetails.replaceFirst(':id', automation.id)),
+        borderRadius: BorderRadius.circular(AppLayout.cardRadius),
+        child: Padding(
+          padding: const EdgeInsets.all(AppLayout.spaceM),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppLayout.spaceS),
+                decoration: BoxDecoration(
+                  // ignore: deprecated_member_use
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppLayout.buttonRadius),
+                ),
+                child: const Icon(
+                  Icons.auto_fix_high,
+                  color: AppColors.primary,
+                ),
               ),
-              child: const Icon(
-                Icons.auto_fix_high,
-                color: AppColors.primary,
-              ),
-            ),
-            const SizedBox(width: AppLayout.spaceM),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    automation.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+              const SizedBox(width: AppLayout.spaceM),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      automation.name,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
+                    Text(
+                      automation.description,
+                      style: theme.textTheme.bodySmall,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppLayout.spaceM),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  _StatusBadge(isActive: automation.isActive),
+                  const SizedBox(height: AppLayout.spaceXS),
                   Text(
-                    automation.description,
-                    style: theme.textTheme.bodySmall,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    automation.lastRun != null
+                        ? 'Last run: Just now' // Simplified for mock
+                        : 'Never run',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontSize: 10,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(width: AppLayout.spaceM),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                _StatusBadge(isActive: automation.isActive),
-                const SizedBox(height: AppLayout.spaceXS),
-                Text(
-                  automation.lastRun != null
-                      ? 'Last run: Just now' // Simplified for mock
-                      : 'Never run',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontSize: 10,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

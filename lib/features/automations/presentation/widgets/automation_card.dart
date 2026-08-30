@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/theme.dart';
 import '../../domain/models/models.dart';
+import '../providers/automation_providers.dart';
 
-class AutomationCard extends StatelessWidget {
+class AutomationCard extends ConsumerWidget {
   final Automation automation;
 
   const AutomationCard({
@@ -12,81 +15,97 @@ class AutomationCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppLayout.spaceM),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(AppLayout.spaceS),
-                  decoration: BoxDecoration(
-                    // ignore: deprecated_member_use
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(AppLayout.buttonRadius),
+      child: InkWell(
+        onTap: () => context.push(AppRoutes.automationDetails.replaceFirst(':id', automation.id)),
+        borderRadius: BorderRadius.circular(AppLayout.cardRadius),
+        child: Padding(
+          padding: const EdgeInsets.all(AppLayout.spaceM),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(AppLayout.spaceS),
+                    decoration: BoxDecoration(
+                      // ignore: deprecated_member_use
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(AppLayout.buttonRadius),
+                    ),
+                    child: const Icon(
+                      Icons.bolt, // Trigger type icon placeholder
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
                   ),
-                  child: const Icon(
-                    Icons.bolt, // Trigger type icon placeholder
-                    color: AppColors.primary,
-                    size: 20,
+                  const SizedBox(width: AppLayout.spaceM),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          automation.name,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: AppLayout.spaceXS),
+                        Text(
+                          automation.description,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: AppLayout.spaceM),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(width: AppLayout.spaceM),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(
-                        automation.name,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: AppLayout.spaceXS),
-                      Text(
-                        automation.description,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                      _StatusBadge(status: automation.status),
+                      const SizedBox(height: AppLayout.spaceS),
+                      Switch.adaptive(
+                        value: automation.status == AutomationStatus.active,
+                        onChanged: (value) async {
+                          await ref.read(automationActionsProvider.notifier).toggleStatus(automation.id);
+                        },
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(width: AppLayout.spaceM),
-                _StatusBadge(status: automation.status),
-              ],
-            ),
-            const SizedBox(height: AppLayout.spaceM),
-            const Divider(),
-            const SizedBox(height: AppLayout.spaceS),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  automation.lastExecutedAt != null
-                      ? 'Last executed: 2 hours ago' // Mock time formatting
-                      : 'Never executed',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                ],
+              ),
+              const SizedBox(height: AppLayout.spaceM),
+              const Divider(),
+              const SizedBox(height: AppLayout.spaceS),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    automation.lastExecutedAt != null
+                        ? 'Last executed: 2 hours ago' // Mock time formatting
+                        : 'Never executed',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
-                ),
-                Text(
-                  'Workflow ID: ${automation.id}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                  Text(
+                    'Workflow ID: ${automation.id}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -81,7 +81,15 @@ class WorkflowPreviewPage extends ConsumerWidget {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: workflow.nodes.length,
-                separatorBuilder: (context, index) => _ConnectorLine(),
+                separatorBuilder: (context, index) {
+                  final sourceId = workflow.nodes[index].id;
+                  final targetId = workflow.nodes[index + 1].id;
+                  final edge = workflow.edges.firstWhere(
+                    (e) => e.sourceNodeId == sourceId && e.targetNodeId == targetId,
+                    orElse: () => WorkflowEdge(id: '', sourceNodeId: sourceId, targetNodeId: targetId),
+                  );
+                  return ConnectorLine(label: edge.label);
+                },
                 itemBuilder: (context, index) {
                   final node = workflow.nodes[index];
                   return WorkflowStepCard(node: node, stepNumber: index + 1);
@@ -198,19 +206,6 @@ class _SectionTitle extends StatelessWidget {
               letterSpacing: 1.2,
               fontWeight: FontWeight.bold,
             ),
-      ),
-    );
-  }
-}
-
-class _ConnectorLine extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 2,
-        height: 24,
-        color: Theme.of(context).colorScheme.outlineVariant,
       ),
     );
   }
