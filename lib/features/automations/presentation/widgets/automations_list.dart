@@ -9,7 +9,7 @@ class AutomationsList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final automationsAsync = ref.watch(automationsListProvider);
+    final automationsAsync = ref.watch(filteredAutomationsProvider);
 
     return automationsAsync.when(
       data: (automations) {
@@ -19,9 +19,9 @@ class AutomationsList extends ConsumerWidget {
               padding: EdgeInsets.symmetric(vertical: AppLayout.spaceXL),
               child: Column(
                 children: [
-                  Icon(Icons.auto_fix_off, size: 48, color: Colors.grey),
+                  Icon(Icons.search_off, size: 48, color: Colors.grey),
                   SizedBox(height: AppLayout.spaceM),
-                  Text('No automations found'),
+                  Text('No automations match your search'),
                 ],
               ),
             ),

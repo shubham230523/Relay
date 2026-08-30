@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../../core/constants/constants.dart';
-import '../widgets/automations_header.dart';
-import '../widgets/automations_list.dart';
+import '../widgets/widgets.dart';
 
 class AutomationsPage extends StatelessWidget {
   const AutomationsPage({super.key});
@@ -15,6 +14,8 @@ class AutomationsPage extends StatelessWidget {
         children: [
           AutomationsHeader(),
           SizedBox(height: AppLayout.spaceL),
+          AutomationSearchBar(),
+          SizedBox(height: AppLayout.spaceM),
           AutomationsList(),
         ],
       ),
