@@ -15,6 +15,7 @@ class MainShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return ResponsiveBuilder(
       mobile: (context) => _MobileShell(navigationShell: navigationShell),
+      tablet: (context) => _DesktopShell(navigationShell: navigationShell),
       desktop: (context) => _DesktopShell(navigationShell: navigationShell),
     );
   }
