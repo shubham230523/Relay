@@ -101,9 +101,7 @@ class WorkflowPreviewPage extends ConsumerWidget {
                   const SizedBox(width: AppLayout.spaceM),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Future: Approve and save workflow
-                      },
+                      onPressed: () => _showApprovalDialog(context, workflow),
                       child: const Text('Approve Workflow'),
                     ),
                   ),
@@ -113,6 +111,73 @@ class WorkflowPreviewPage extends ConsumerWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+
+  void _showApprovalDialog(BuildContext context, Workflow workflow) {
+    showDialog(
+      context: context,
+      builder: (context) => Consumer(
+        builder: (context, ref, child) {
+          final state = ref.watch(workflowGenerationProvider);
+          
+          return AlertDialog(
+            title: const Text('Approve Workflow'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Workflow: ${workflow.name}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: AppLayout.spaceS),
+                Text('This automation contains ${workflow.nodes.length} steps.'),
+                const SizedBox(height: AppLayout.spaceM),
+                const Text(
+                  'Once approved, this workflow will be activated. You can modify these steps later in the workflow builder.',
+                ),
+                if (state.isSaving) ...[
+                  const SizedBox(height: AppLayout.spaceM),
+                  const Center(child: CircularProgressIndicator()),
+                ],
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: state.isSaving ? null : () => Navigator.of(context).pop(),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: state.isSaving
+                    ? null
+                    : () async {
+                        final notifier = ref.read(workflowGenerationProvider.notifier);
+                        await notifier.approveWorkflow();
+
+                        final finalState = ref.read(workflowGenerationProvider);
+                        if (finalState.savedAutomation != null) {
+                          if (context.mounted) {
+                            Navigator.of(context).pop(); // Close dialog
+                            context.go(AppRoutes.automationDetails.replaceFirst(':id', finalState.savedAutomation!.id));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Workflow approved and activated!')),
+                            );
+                          }
+                        } else if (finalState.error != null) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error: ${finalState.error}')),
+                            );
+                          }
+                        }
+                      },
+                child: const Text('Approve & Activate'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

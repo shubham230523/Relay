@@ -6,6 +6,7 @@ class AppRoutes {
   static const String automations = '/automations';
   static const String createAutomation = '/automations/create';
   static const String workflowDetails = '/automations/details';
+  static const String automationDetails = '/automations/:id';
   
   static const String executions = '/executions';
   static const String executionDetails = '/executions/details';
