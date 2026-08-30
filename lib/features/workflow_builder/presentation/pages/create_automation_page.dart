@@ -12,18 +12,27 @@ class CreateAutomationPage extends StatefulWidget {
 
 class _CreateAutomationPageState extends State<CreateAutomationPage> {
   late final TextEditingController _controller;
+  static const int _maxChars = 500;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController();
+    _controller.addListener(_onTextChanged);
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_onTextChanged);
     _controller.dispose();
     super.dispose();
   }
+
+  void _onTextChanged() {
+    setState(() {});
+  }
+
+  bool get _isInputValid => _controller.text.trim().isNotEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -60,17 +69,34 @@ class _CreateAutomationPageState extends State<CreateAutomationPage> {
               controller: _controller,
               maxLines: 6,
               minLines: 4,
+              maxLength: _maxChars,
               decoration: const InputDecoration(
                 hintText:
                     'Example: "Whenever I receive an invoice by email, extract the details, save them to Google sheets, and notify me if the amount is above \$50,000"',
                 alignLabelWithHint: true,
+                counterText: '', // We will show custom counter if needed, but standard maxLength works
               ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  '${_controller.text.length} / $_maxChars',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: _controller.text.length >= _maxChars
+                        ? theme.colorScheme.error
+                        : AppColors.textSecondary,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: AppLayout.spaceL),
             ElevatedButton(
-              onPressed: () {
-                // Future: Implement AI workflow generation
-              },
+              onPressed: _isInputValid
+                  ? () {
+                      // Future: Implement AI workflow generation
+                    }
+                  : null,
               child: const Text('Generate Workflow'),
             ),
             const SizedBox(height: AppLayout.spaceXL),
