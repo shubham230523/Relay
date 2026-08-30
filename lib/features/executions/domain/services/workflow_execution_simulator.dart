@@ -15,7 +15,7 @@ class ExecutionFailureConfig {
 }
 
 abstract class WorkflowExecutionSimulator {
-  Future<void> simulate(
+  Future<String> simulate(
     String automationId,
     Workflow workflow, {
     ExecutionFailureConfig failureConfig = ExecutionFailureConfig.none,

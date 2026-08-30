@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/widgets.dart';
@@ -240,10 +241,18 @@ class _RunNowButton extends ConsumerWidget {
           ? null
           : () async {
               await ref.read(automationActionsProvider.notifier).runNow(automationId);
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Execution started...')),
-                );
+              
+              final state = ref.read(automationActionsProvider);
+              if (state.hasValue && state.value != null) {
+                if (context.mounted) {
+                  context.push(AppRoutes.executionDetails.replaceFirst(':id', state.value!));
+                }
+              } else if (state.hasError) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error: ${state.error}')),
+                  );
+                }
               }
             },
       icon: isLoading

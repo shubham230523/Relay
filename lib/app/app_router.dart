@@ -5,6 +5,7 @@ import '../features/automations/presentation/pages/automations_page.dart';
 import '../features/automations/presentation/pages/automation_details_page.dart';
 import '../features/workflow_builder/presentation/pages/create_automation_page.dart';
 import '../features/workflow_builder/presentation/pages/workflow_preview_page.dart';
+import '../features/executions/presentation/pages/execution_details_page.dart';
 import 'main_shell.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -61,6 +62,13 @@ final appRouter = GoRouter(
               builder: (context, state) => const Scaffold(
                 body: Center(child: Text('Executions')),
               ),
+            ),
+            GoRoute(
+              path: AppRoutes.executionDetails,
+              builder: (context, state) {
+                final id = state.pathParameters['id'] ?? '';
+                return ExecutionDetailsPage(id: id);
+              },
             ),
           ],
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../executions/presentation/providers/execution_providers.dart';
 import '../../../workflow_builder/domain/models/models.dart';
 import '../../../workflow_builder/presentation/providers/workflow_builder_providers.dart';
 import '../../data/repositories/mock_automation_repository.dart';
@@ -24,7 +25,7 @@ final workflowProvider = FutureProvider.family<Workflow?, String>((ref, workflow
   return repository.getWorkflowById(workflowId);
 });
 
-class AutomationNotifier extends StateNotifier<AsyncValue<void>> {
+class AutomationNotifier extends StateNotifier<AsyncValue<String?>> {
   final AutomationRepository _repository;
   final Ref _ref;
 
@@ -34,11 +35,8 @@ class AutomationNotifier extends StateNotifier<AsyncValue<void>> {
     state = const AsyncValue.loading();
     try {
       await _repository.toggleAutomationStatus(id);
-      
-      // Invalidate providers to refresh UI
       _ref.invalidate(automationsListProvider);
       _ref.invalidate(automationDetailsProvider(id));
-      
       state = const AsyncValue.data(null);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
@@ -48,19 +46,25 @@ class AutomationNotifier extends StateNotifier<AsyncValue<void>> {
   Future<void> runNow(String id) async {
     state = const AsyncValue.loading();
     try {
-      // Simulate execution trigger delay
-      await Future.delayed(const Duration(seconds: 1));
+      final automation = await _repository.getAutomationById(id);
+      if (automation == null || automation.workflowId == null) {
+        throw Exception('Automation or workflow not found');
+      }
+
+      final workflow = await _ref.read(workflowProvider(automation.workflowId!).future);
+      if (workflow == null) throw Exception('Workflow not found');
+
+      final simulator = _ref.read(workflowExecutionSimulatorProvider);
+      final executionId = await simulator.simulate(id, workflow);
       
-      // Future: Add real execution trigger logic here
-      
-      state = const AsyncValue.data(null);
+      state = AsyncValue.data(executionId);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
   }
 }
 
-final automationActionsProvider = StateNotifierProvider<AutomationNotifier, AsyncValue<void>>((ref) {
+final automationActionsProvider = StateNotifierProvider<AutomationNotifier, AsyncValue<String?>>((ref) {
   final repository = ref.watch(automationRepositoryProvider);
   return AutomationNotifier(repository, ref);
 });

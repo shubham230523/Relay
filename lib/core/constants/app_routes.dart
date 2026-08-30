@@ -9,7 +9,7 @@ class AppRoutes {
   static const String automationDetails = '/automations/:id';
   
   static const String executions = '/executions';
-  static const String executionDetails = '/executions/details';
+  static const String executionDetails = '/executions/:id';
   
   static const String templates = '/templates';
   static const String integrations = '/integrations';

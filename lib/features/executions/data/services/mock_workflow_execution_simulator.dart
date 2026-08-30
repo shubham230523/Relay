@@ -11,7 +11,7 @@ class MockWorkflowExecutionSimulator implements WorkflowExecutionSimulator {
   MockWorkflowExecutionSimulator(this._repository);
 
   @override
-  Future<void> simulate(
+  Future<String> simulate(
     String automationId,
     Workflow workflow, {
     ExecutionFailureConfig failureConfig = ExecutionFailureConfig.none,
@@ -29,6 +29,22 @@ class MockWorkflowExecutionSimulator implements WorkflowExecutionSimulator {
     );
     await _repository.createExecution(execution);
 
+    // Return the ID immediately in a real scenario we might do this or use streams,
+    // but here we want to trigger the simulation as well.
+    _runSimulation(execution, workflow, failureConfig);
+
+    return executionId;
+  }
+
+  Future<void> _runSimulation(
+    Execution initialExecution,
+    Workflow workflow,
+    ExecutionFailureConfig failureConfig,
+  ) async {
+    var execution = initialExecution;
+    final executionId = execution.id;
+    final startTime = execution.startedAt;
+
     await Future.delayed(const Duration(milliseconds: 500));
 
     // 2. Change execution to running
@@ -38,7 +54,6 @@ class MockWorkflowExecutionSimulator implements WorkflowExecutionSimulator {
     bool hasFailed = false;
     String? failureMessage;
 
-    // Determine if we should fail randomly and at which node index
     int? randomFailureIndex;
     if (failureConfig.failRandomly && workflow.nodes.isNotEmpty) {
       randomFailureIndex = _random.nextInt(workflow.nodes.length);
@@ -61,26 +76,21 @@ class MockWorkflowExecutionSimulator implements WorkflowExecutionSimulator {
 
       await Future.delayed(const Duration(seconds: 1));
 
-      // Check for failure condition
       final shouldFail = (failureConfig.failAtNodeId == node.id) || (randomFailureIndex == i);
 
       if (shouldFail) {
         hasFailed = true;
         failureMessage = failureConfig.customErrorMessage ?? 'Simulated failure at node: ${node.title}';
         
-        // 4. Mark step failed
         step = step.copyWith(
           status: ExecutionStepStatus.failed,
           completedAt: DateTime.now(),
           errorMessage: failureMessage,
         );
         await _repository.updateExecutionStep(executionId, step);
-        
-        // Stop subsequent steps
         break;
       }
 
-      // 5. Mark node success
       step = step.copyWith(
         status: ExecutionStepStatus.success,
         completedAt: DateTime.now(),
@@ -89,7 +99,6 @@ class MockWorkflowExecutionSimulator implements WorkflowExecutionSimulator {
       await _repository.updateExecutionStep(executionId, step);
     }
 
-    // 6. Mark execution result
     final endTime = DateTime.now();
     if (hasFailed) {
       execution = execution.copyWith(
