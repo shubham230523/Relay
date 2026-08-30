@@ -1,1 +1,1 @@
-// Export utility functions here
+export 'responsive_breakpoints.dart';
