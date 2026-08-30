@@ -1,1 +1,1 @@
-// Export theme related files here
+export 'app_colors.dart';
