@@ -10,22 +10,26 @@ final workflowPlannerProvider = Provider<WorkflowPlanner>((ref) {
 class WorkflowGenerationState {
   final bool isLoading;
   final Workflow? workflow;
+  final String? originalPrompt;
   final String? error;
 
   const WorkflowGenerationState({
     this.isLoading = false,
     this.workflow,
+    this.originalPrompt,
     this.error,
   });
 
   WorkflowGenerationState copyWith({
     bool? isLoading,
     Workflow? workflow,
+    String? originalPrompt,
     String? error,
   }) {
     return WorkflowGenerationState(
       isLoading: isLoading ?? this.isLoading,
       workflow: workflow ?? this.workflow,
+      originalPrompt: originalPrompt ?? this.originalPrompt,
       error: error ?? this.error,
     );
   }
@@ -37,7 +41,7 @@ class WorkflowGenerationNotifier extends StateNotifier<WorkflowGenerationState> 
   WorkflowGenerationNotifier(this._planner) : super(const WorkflowGenerationState());
 
   Future<void> generateWorkflow(String prompt) async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, error: null, originalPrompt: prompt);
     try {
       final workflow = await _planner.generateWorkflow(prompt);
       state = state.copyWith(isLoading: false, workflow: workflow);
