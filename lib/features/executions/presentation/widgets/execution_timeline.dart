@@ -127,8 +127,8 @@ class _TimelineStepState extends State<_TimelineStep> {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     width: 2,
-                    // ignore: deprecated_member_use
                     color: isRunning 
+                        // ignore: deprecated_member_use
                         ? AppColors.info.withOpacity(0.3) 
                         : theme.colorScheme.outlineVariant,
                   ),

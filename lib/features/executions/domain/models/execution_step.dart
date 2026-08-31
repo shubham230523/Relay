@@ -30,6 +30,7 @@ class ExecutionStep {
 
   ExecutionStep copyWith({
     ExecutionStepStatus? status,
+    DateTime? startedAt,
     DateTime? completedAt,
     Map<String, dynamic>? input,
     Map<String, dynamic>? output,
@@ -41,7 +42,7 @@ class ExecutionStep {
       nodeTitle: nodeTitle,
       nodeType: nodeType,
       status: status ?? this.status,
-      startedAt: startedAt,
+      startedAt: startedAt ?? this.startedAt,
       completedAt: completedAt ?? this.completedAt,
       input: input ?? this.input,
       output: output ?? this.output,

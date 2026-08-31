@@ -6,6 +6,7 @@ import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../widgets/widgets.dart';
 import '../providers/execution_providers.dart';
+import '../../../workflow_builder/domain/models/models.dart';
 import '../../domain/models/models.dart';
 
 class ExecutionDetailsPage extends ConsumerWidget {
@@ -32,6 +33,38 @@ class ExecutionDetailsPage extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeader(context, execution),
+                if (execution.status == ExecutionStatus.failed) ...[
+                  const SizedBox(height: AppLayout.spaceL),
+                  stepsAsync.when(
+                    data: (steps) {
+                      final failedStep = steps.firstWhere(
+                        (s) => s.status == ExecutionStepStatus.failed,
+                        orElse: () => ExecutionStep(
+                          id: '',
+                          nodeId: '',
+                          nodeTitle: 'Unknown Step',
+                          nodeType: WorkflowNodeType.action,
+                          status: ExecutionStepStatus.failed,
+                          startedAt: DateTime.now(),
+                        ),
+                      );
+                      return ExecutionFailureCard(
+                        failedStepName: failedStep.nodeTitle,
+                        errorMessage: execution.errorMessage ?? 'An unexpected error occurred.',
+                        errorCategory: _getErrorCategory(execution.errorMessage),
+                        failureTime: execution.completedAt ?? DateTime.now(),
+                        onRetry: () {
+                          ref.read(executionActionsProvider.notifier).retryExecution(
+                                execution.id,
+                                execution.workflowId,
+                              );
+                        },
+                      );
+                    },
+                    loading: () => const SizedBox.shrink(),
+                    error: (e, s) => const SizedBox.shrink(),
+                  ),
+                ],
                 const SizedBox(height: AppLayout.spaceXL),
                 Text(
                   'Execution steps',
@@ -110,33 +143,20 @@ class ExecutionDetailsPage extends ConsumerWidget {
                 ),
               ],
             ),
-            if (execution.errorMessage != null) ...[
-              const SizedBox(height: AppLayout.spaceM),
-              Container(
-                padding: const EdgeInsets.all(AppLayout.spaceM),
-                decoration: BoxDecoration(
-                  // ignore: deprecated_member_use
-                  color: AppColors.error.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppLayout.buttonRadius),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.error_outline, color: AppColors.error, size: 16),
-                    const SizedBox(width: AppLayout.spaceS),
-                    Expanded(
-                      child: Text(
-                        execution.errorMessage!,
-                        style: theme.textTheme.bodySmall?.copyWith(color: AppColors.error),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
           ],
         ),
       ),
     );
+  }
+
+  String _getErrorCategory(String? message) {
+    if (message == null) return 'Unknown';
+    final lower = message.toLowerCase();
+    if (lower.contains('timeout')) return 'Timeout';
+    if (lower.contains('network') || lower.contains('connect')) return 'Network';
+    if (lower.contains('auth') || lower.contains('permission')) return 'Authentication';
+    if (lower.contains('config')) return 'Configuration';
+    return 'Execution Error';
   }
 }
 

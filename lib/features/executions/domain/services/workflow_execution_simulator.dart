@@ -20,4 +20,9 @@ abstract class WorkflowExecutionSimulator {
     Workflow workflow, {
     ExecutionFailureConfig failureConfig = ExecutionFailureConfig.none,
   });
+
+  Future<void> retry(
+    String executionId,
+    Workflow workflow,
+  );
 }

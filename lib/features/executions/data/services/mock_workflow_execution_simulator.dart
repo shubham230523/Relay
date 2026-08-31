@@ -35,20 +35,48 @@ class MockWorkflowExecutionSimulator implements WorkflowExecutionSimulator {
     return executionId;
   }
 
+  @override
+  Future<void> retry(String executionId, Workflow workflow) async {
+    final execution = await _repository.getExecutionById(executionId);
+    if (execution == null) throw Exception('Execution not found');
+
+    final steps = await _repository.getExecutionSteps(executionId);
+    final failedStepIndex = steps.indexWhere((s) => s.status == ExecutionStepStatus.failed);
+    
+    if (failedStepIndex == -1) return;
+
+    // Reset execution status
+    await _repository.updateExecution(execution.copyWith(
+      status: ExecutionStatus.running,
+      errorMessage: null,
+    ));
+
+    // Resume from the failed node
+    _runSimulation(
+      execution,
+      workflow,
+      ExecutionFailureConfig.none, // Don't fail on retry for simplicity
+      startIndex: failedStepIndex,
+    );
+  }
+
   Future<void> _runSimulation(
     Execution initialExecution,
     Workflow workflow,
-    ExecutionFailureConfig failureConfig,
-  ) async {
+    ExecutionFailureConfig failureConfig, {
+    int startIndex = 0,
+  }) async {
     var execution = initialExecution;
     final executionId = execution.id;
     final startTime = execution.startedAt;
 
-    await Future.delayed(const Duration(milliseconds: 500));
+    if (startIndex == 0) {
+      await Future.delayed(const Duration(milliseconds: 500));
 
-    // 2. Change execution to running
-    execution = execution.copyWith(status: ExecutionStatus.running);
-    await _repository.updateExecution(execution);
+      // 2. Change execution to running
+      execution = execution.copyWith(status: ExecutionStatus.running);
+      await _repository.updateExecution(execution);
+    }
 
     bool hasFailed = false;
     String? failureMessage;
@@ -59,20 +87,33 @@ class MockWorkflowExecutionSimulator implements WorkflowExecutionSimulator {
     }
 
     // 3. Execute workflow nodes sequentially
-    for (int i = 0; i < workflow.nodes.length; i++) {
+    for (int i = startIndex; i < workflow.nodes.length; i++) {
       final node = workflow.nodes[i];
       final stepStartTime = DateTime.now();
-      final stepId = 'step_${stepStartTime.millisecondsSinceEpoch}_${node.id}';
-
-      var step = ExecutionStep(
-        id: stepId,
+      
+      // If retrying, we might already have the step record, or we just create/update it.
+      // For the mock, we'll try to find if it exists.
+      final existingSteps = await _repository.getExecutionSteps(executionId);
+      final existingStep = existingSteps.firstWhere((s) => s.nodeId == node.id, orElse: () => ExecutionStep(
+        id: 'step_${stepStartTime.millisecondsSinceEpoch}_${node.id}',
         nodeId: node.id,
         nodeTitle: node.title,
         nodeType: node.type,
+        status: ExecutionStepStatus.pending,
+        startedAt: stepStartTime,
+      ));
+
+      var step = existingStep.copyWith(
         status: ExecutionStepStatus.running,
         startedAt: stepStartTime,
+        errorMessage: null,
       );
-      await _repository.createExecutionStep(executionId, step);
+      
+      if (existingSteps.any((s) => s.id == step.id)) {
+        await _repository.updateExecutionStep(executionId, step);
+      } else {
+        await _repository.createExecutionStep(executionId, step);
+      }
 
       await Future.delayed(const Duration(seconds: 1));
 
@@ -112,6 +153,7 @@ class MockWorkflowExecutionSimulator implements WorkflowExecutionSimulator {
         status: ExecutionStatus.success,
         completedAt: endTime,
         duration: endTime.difference(startTime),
+        errorMessage: null,
       );
     }
     await _repository.updateExecution(execution);
