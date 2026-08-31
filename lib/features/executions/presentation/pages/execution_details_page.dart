@@ -48,17 +48,26 @@ class ExecutionDetailsPage extends ConsumerWidget {
                           startedAt: DateTime.now(),
                         ),
                       );
-                      return ExecutionFailureCard(
-                        failedStepName: failedStep.nodeTitle,
-                        errorMessage: execution.errorMessage ?? 'An unexpected error occurred.',
-                        errorCategory: _getErrorCategory(execution.errorMessage),
-                        failureTime: execution.completedAt ?? DateTime.now(),
-                        onRetry: () {
-                          ref.read(executionActionsProvider.notifier).retryExecution(
-                                execution.id,
-                                execution.workflowId,
-                              );
-                        },
+                      return Column(
+                        children: [
+                          ExecutionFailureCard(
+                            failedStepName: failedStep.nodeTitle,
+                            errorMessage: execution.errorMessage ?? 'An unexpected error occurred.',
+                            errorCategory: _getErrorCategory(execution.errorMessage),
+                            failureTime: execution.completedAt ?? DateTime.now(),
+                            onRetry: () {
+                              ref.read(executionActionsProvider.notifier).retryExecution(
+                                    execution.id,
+                                    execution.workflowId,
+                                  );
+                            },
+                            onAskAI: () {
+                              ref.read(executionActionsProvider.notifier).analyzeFailure(execution.id);
+                            },
+                          ),
+                          const SizedBox(height: AppLayout.spaceM),
+                          FailureAnalysisView(executionId: execution.id),
+                        ],
                       );
                     },
                     loading: () => const SizedBox.shrink(),

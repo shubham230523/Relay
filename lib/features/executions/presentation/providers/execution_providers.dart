@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/mock_execution_repository.dart';
+import '../../data/services/mock_recovery_agent.dart';
 import '../../data/services/mock_workflow_execution_simulator.dart';
 import '../../domain/models/models.dart';
 import '../../domain/repositories/execution_repository.dart';
@@ -13,6 +14,10 @@ final executionRepositoryProvider = Provider<ExecutionRepository>((ref) {
 final workflowExecutionSimulatorProvider = Provider<WorkflowExecutionSimulator>((ref) {
   final repo = ref.watch(executionRepositoryProvider);
   return MockWorkflowExecutionSimulator(repo);
+});
+
+final recoveryAgentProvider = Provider<RecoveryAgent>((ref) {
+  return MockRecoveryAgent();
 });
 
 class ExecutionActionsNotifier extends StateNotifier<AsyncValue<void>> {
@@ -33,11 +38,44 @@ class ExecutionActionsNotifier extends StateNotifier<AsyncValue<void>> {
       state = AsyncValue.error(e, st);
     }
   }
+
+  Future<void> analyzeFailure(String executionId) async {
+    _ref.read(failureAnalysisProvider(executionId).notifier).analyze();
+  }
 }
 
 final executionActionsProvider = StateNotifierProvider<ExecutionActionsNotifier, AsyncValue<void>>((ref) {
   final simulator = ref.watch(workflowExecutionSimulatorProvider);
   return ExecutionActionsNotifier(simulator, ref);
+});
+
+class FailureAnalysisNotifier extends StateNotifier<AsyncValue<FailureAnalysis?>> {
+  final String _executionId;
+  final RecoveryAgent _agent;
+  final Ref _ref;
+
+  FailureAnalysisNotifier(this._executionId, this._agent, this._ref) : super(const AsyncValue.data(null));
+
+  Future<void> analyze() async {
+    state = const AsyncValue.loading();
+    try {
+      final execution = await _ref.read(executionDetailsProvider(_executionId).future);
+      final steps = await _ref.read(executionStepsProvider(_executionId).future);
+
+      if (execution == null) throw Exception('Execution not found');
+
+      final analysis = await _agent.analyzeFailure(execution, steps);
+      state = AsyncValue.data(analysis);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+}
+
+final failureAnalysisProvider =
+    StateNotifierProvider.family<FailureAnalysisNotifier, AsyncValue<FailureAnalysis?>, String>((ref, executionId) {
+  final agent = ref.watch(recoveryAgentProvider);
+  return FailureAnalysisNotifier(executionId, agent, ref);
 });
 
 final executionHistoryProvider = FutureProvider.family<List<Execution>, String?>((ref, automationId) async {
