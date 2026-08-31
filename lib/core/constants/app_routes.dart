@@ -12,6 +12,7 @@ class AppRoutes {
   static const String executionDetails = '/executions/:id';
   
   static const String templates = '/templates';
+  static const String templateDetails = '/templates/:id';
   static const String integrations = '/integrations';
   static const String settings = '/settings';
 }

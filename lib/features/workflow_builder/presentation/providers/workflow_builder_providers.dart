@@ -69,6 +69,15 @@ class WorkflowGenerationNotifier extends StateNotifier<WorkflowGenerationState> 
     }
   }
 
+  void generateFromTemplate(Workflow workflow, String prompt) {
+    state = state.copyWith(
+      workflow: workflow,
+      originalPrompt: prompt,
+      isLoading: false,
+      error: null,
+    );
+  }
+
   Future<void> approveWorkflow() async {
     final workflow = state.workflow;
     if (workflow == null) return;

@@ -7,6 +7,8 @@ import '../features/workflow_builder/presentation/pages/create_automation_page.d
 import '../features/workflow_builder/presentation/pages/workflow_preview_page.dart';
 import '../features/executions/presentation/pages/execution_details_page.dart';
 import '../features/executions/presentation/pages/executions_page.dart';
+import '../features/templates/presentation/pages/template_details_page.dart';
+import '../features/templates/presentation/pages/templates_page.dart';
 import 'main_shell.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -75,9 +77,16 @@ final appRouter = GoRouter(
           routes: [
             GoRoute(
               path: AppRoutes.templates,
-              builder: (context, state) => const Scaffold(
-                body: Center(child: Text('Templates')),
-              ),
+              builder: (context, state) => const TemplatesPage(),
+              routes: [
+                GoRoute(
+                  path: ':id',
+                  builder: (context, state) {
+                    final id = state.pathParameters['id'] ?? '';
+                    return TemplateDetailsPage(id: id);
+                  },
+                ),
+              ],
             ),
           ],
         ),
