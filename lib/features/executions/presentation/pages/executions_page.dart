@@ -3,14 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../providers/execution_providers.dart';
-import '../widgets/execution_list_item.dart';
+import '../widgets/widgets.dart';
 
 class ExecutionsPage extends ConsumerWidget {
   const ExecutionsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final executionsAsync = ref.watch(executionHistoryProvider(null));
+    final executionsAsync = ref.watch(filteredExecutionHistoryProvider(null));
     final theme = Theme.of(context);
 
     return PageContainer(
@@ -32,6 +32,8 @@ class ExecutionsPage extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: AppLayout.spaceL),
+          const ExecutionStatusFilter(),
+          const SizedBox(height: AppLayout.spaceM),
           executionsAsync.when(
             data: (executions) {
               if (executions.isEmpty) {
