@@ -19,14 +19,14 @@ final executionHistoryProvider = FutureProvider.family<List<Execution>, String?>
   return repo.getExecutionHistory(automationId: automationId);
 });
 
-final executionDetailsProvider = FutureProvider.family<Execution?, String>((ref, id) async {
+final executionDetailsProvider = StreamProvider.family<Execution?, String>((ref, id) {
   final repo = ref.watch(executionRepositoryProvider);
-  return repo.getExecutionById(id);
+  return repo.watchExecution(id);
 });
 
-final executionStepsProvider = FutureProvider.family<List<ExecutionStep>, String>((ref, executionId) async {
+final executionStepsProvider = StreamProvider.family<List<ExecutionStep>, String>((ref, executionId) {
   final repo = ref.watch(executionRepositoryProvider);
-  return repo.getExecutionSteps(executionId);
+  return repo.watchExecutionSteps(executionId);
 });
 
 final executionStatusFilterProvider = StateProvider<ExecutionStatus?>((ref) => null);

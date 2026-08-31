@@ -8,4 +8,7 @@ abstract class ExecutionRepository {
   Future<Execution> updateExecution(Execution execution);
   Future<ExecutionStep> createExecutionStep(String executionId, ExecutionStep step);
   Future<ExecutionStep> updateExecutionStep(String executionId, ExecutionStep step);
+
+  Stream<Execution?> watchExecution(String id);
+  Stream<List<ExecutionStep>> watchExecutionSteps(String executionId);
 }

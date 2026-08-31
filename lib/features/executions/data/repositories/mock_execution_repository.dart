@@ -1,3 +1,4 @@
+import 'dart:async';
 import '../../../workflow_builder/domain/models/models.dart';
 import '../../domain/models/models.dart';
 import '../../domain/repositories/execution_repository.dart';
@@ -5,6 +6,9 @@ import '../../domain/repositories/execution_repository.dart';
 class MockExecutionRepository implements ExecutionRepository {
   final List<Execution> _executions = [];
   final Map<String, List<ExecutionStep>> _executionSteps = {};
+  
+  final _executionController = StreamController<Execution?>.broadcast();
+  final _stepsController = StreamController<List<ExecutionStep>>.broadcast();
 
   MockExecutionRepository() {
     _initMockData();
@@ -122,6 +126,7 @@ class MockExecutionRepository implements ExecutionRepository {
     final index = _executions.indexWhere((e) => e.id == execution.id);
     if (index != -1) {
       _executions[index] = execution;
+      _executionController.add(execution);
       return execution;
     }
     throw Exception('Execution not found');
@@ -134,6 +139,7 @@ class MockExecutionRepository implements ExecutionRepository {
       _executionSteps[executionId] = [];
     }
     _executionSteps[executionId]!.add(step);
+    _stepsController.add(List.unmodifiable(_executionSteps[executionId]!));
     return step;
   }
 
@@ -145,9 +151,34 @@ class MockExecutionRepository implements ExecutionRepository {
       final index = steps.indexWhere((s) => s.id == step.id);
       if (index != -1) {
         steps[index] = step;
+        _stepsController.add(List.unmodifiable(steps));
         return step;
       }
     }
     throw Exception('Step not found');
+  }
+
+  @override
+  Stream<Execution?> watchExecution(String id) async* {
+    // Yield current value
+    try {
+      yield _executions.firstWhere((e) => e.id == id);
+    } catch (_) {
+      yield null;
+    }
+    
+    // Yield updates
+    yield* _executionController.stream.where((e) => e == null || e.id == id);
+  }
+
+  @override
+  Stream<List<ExecutionStep>> watchExecutionSteps(String executionId) async* {
+    // Yield current value
+    yield List.unmodifiable(_executionSteps[executionId] ?? []);
+    
+    // Yield updates
+    // In a real app we'd filter the stream by executionId. 
+    // Here we assume only one execution runs at a time or simplify for mock.
+    yield* _stepsController.stream;
   }
 }
