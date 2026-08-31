@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../../../workflow_builder/domain/models/workflow_node.dart';
 import 'execution_step_status.dart';
 
 @immutable
@@ -6,6 +7,7 @@ class ExecutionStep {
   final String id;
   final String nodeId;
   final String nodeTitle;
+  final WorkflowNodeType nodeType;
   final ExecutionStepStatus status;
   final DateTime startedAt;
   final DateTime? completedAt;
@@ -17,6 +19,7 @@ class ExecutionStep {
     required this.id,
     required this.nodeId,
     required this.nodeTitle,
+    required this.nodeType,
     required this.status,
     required this.startedAt,
     this.completedAt,
@@ -36,6 +39,7 @@ class ExecutionStep {
       id: id,
       nodeId: nodeId,
       nodeTitle: nodeTitle,
+      nodeType: nodeType,
       status: status ?? this.status,
       startedAt: startedAt,
       completedAt: completedAt ?? this.completedAt,

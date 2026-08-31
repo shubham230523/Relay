@@ -5,6 +5,7 @@ import 'execution_status.dart';
 class Execution {
   final String id;
   final String automationId;
+  final String automationName;
   final String workflowId;
   final ExecutionStatus status;
   final DateTime startedAt;
@@ -15,6 +16,7 @@ class Execution {
   const Execution({
     required this.id,
     required this.automationId,
+    required this.automationName,
     required this.workflowId,
     required this.status,
     required this.startedAt,
@@ -32,6 +34,7 @@ class Execution {
     return Execution(
       id: id,
       automationId: automationId,
+      automationName: automationName,
       workflowId: workflowId,
       status: status ?? this.status,
       startedAt: startedAt,

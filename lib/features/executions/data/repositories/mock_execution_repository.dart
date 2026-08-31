@@ -1,3 +1,4 @@
+import '../../../workflow_builder/domain/models/models.dart';
 import '../../domain/models/models.dart';
 import '../../domain/repositories/execution_repository.dart';
 
@@ -14,6 +15,7 @@ class MockExecutionRepository implements ExecutionRepository {
     final e1 = Execution(
       id: 'exec_1',
       automationId: 'auto_1',
+      automationName: 'GitHub to Slack Sync',
       workflowId: 'wf_1',
       status: ExecutionStatus.success,
       startedAt: now.subtract(const Duration(hours: 1)),
@@ -24,6 +26,7 @@ class MockExecutionRepository implements ExecutionRepository {
     final e2 = Execution(
       id: 'exec_2',
       automationId: 'auto_1',
+      automationName: 'GitHub to Slack Sync',
       workflowId: 'wf_1',
       status: ExecutionStatus.failed,
       startedAt: now.subtract(const Duration(hours: 2)),
@@ -39,6 +42,7 @@ class MockExecutionRepository implements ExecutionRepository {
         id: 'step_1_1',
         nodeId: 'node_1',
         nodeTitle: 'New Email',
+        nodeType: WorkflowNodeType.trigger,
         status: ExecutionStepStatus.success,
         startedAt: e1.startedAt,
         completedAt: e1.startedAt.add(const Duration(seconds: 5)),
@@ -48,6 +52,7 @@ class MockExecutionRepository implements ExecutionRepository {
         id: 'step_1_2',
         nodeId: 'node_2',
         nodeTitle: 'Analyze Invoice',
+        nodeType: WorkflowNodeType.ai,
         status: ExecutionStepStatus.success,
         startedAt: e1.startedAt.add(const Duration(seconds: 5)),
         completedAt: e1.startedAt.add(const Duration(seconds: 45)),
@@ -61,6 +66,7 @@ class MockExecutionRepository implements ExecutionRepository {
         id: 'step_2_1',
         nodeId: 'node_1',
         nodeTitle: 'New Email',
+        nodeType: WorkflowNodeType.trigger,
         status: ExecutionStepStatus.success,
         startedAt: e2.startedAt,
         completedAt: e2.startedAt.add(const Duration(seconds: 5)),
@@ -69,6 +75,7 @@ class MockExecutionRepository implements ExecutionRepository {
         id: 'step_2_2',
         nodeId: 'node_2',
         nodeTitle: 'Analyze Invoice',
+        nodeType: WorkflowNodeType.ai,
         status: ExecutionStepStatus.failed,
         startedAt: e2.startedAt.add(const Duration(seconds: 5)),
         completedAt: e2.startedAt.add(const Duration(seconds: 10)),

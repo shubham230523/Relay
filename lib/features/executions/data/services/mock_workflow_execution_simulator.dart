@@ -23,14 +23,13 @@ class MockWorkflowExecutionSimulator implements WorkflowExecutionSimulator {
     var execution = Execution(
       id: executionId,
       automationId: automationId,
+      automationName: workflow.name,
       workflowId: workflow.id,
       status: ExecutionStatus.pending,
       startedAt: startTime,
     );
     await _repository.createExecution(execution);
 
-    // Return the ID immediately in a real scenario we might do this or use streams,
-    // but here we want to trigger the simulation as well.
     _runSimulation(execution, workflow, failureConfig);
 
     return executionId;
@@ -69,6 +68,7 @@ class MockWorkflowExecutionSimulator implements WorkflowExecutionSimulator {
         id: stepId,
         nodeId: node.id,
         nodeTitle: node.title,
+        nodeType: node.type,
         status: ExecutionStepStatus.running,
         startedAt: stepStartTime,
       );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/widgets.dart';
@@ -33,14 +34,14 @@ class ExecutionDetailsPage extends ConsumerWidget {
                 _buildHeader(context, execution),
                 const SizedBox(height: AppLayout.spaceXL),
                 Text(
-                  'Steps',
+                  'Execution steps',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                 ),
-                const SizedBox(height: AppLayout.spaceM),
+                const SizedBox(height: AppLayout.spaceL),
                 stepsAsync.when(
-                  data: (steps) => _buildStepsList(context, steps),
+                  data: (steps) => ExecutionTimeline(steps: steps),
                   loading: () => const Center(child: CircularProgressIndicator()),
                   error: (err, st) => Text('Error loading steps: $err'),
                 ),
@@ -56,37 +57,56 @@ class ExecutionDetailsPage extends ConsumerWidget {
 
   Widget _buildHeader(BuildContext context, Execution execution) {
     final theme = Theme.of(context);
+    final dateFormat = DateFormat('MMM dd, yyyy HH:mm:ss');
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppLayout.spaceM),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Status',
-                      style: theme.textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
-                    ),
-                    const SizedBox(height: AppLayout.spaceXS),
-                    ExecutionStatusBadge(status: execution.status),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Automation',
+                        style: theme.textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
+                      ),
+                      Text(
+                        execution.automationName,
+                        style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      'Started At',
-                      style: theme.textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
-                    ),
-                    Text(
-                      'Just now', // Mock formatting
-                      style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                  ],
+                ExecutionStatusBadge(status: execution.status),
+              ],
+            ),
+            const SizedBox(height: AppLayout.spaceL),
+            const Divider(),
+            const SizedBox(height: AppLayout.spaceL),
+            Row(
+              children: [
+                _InfoItem(
+                  label: 'Start time',
+                  value: dateFormat.format(execution.startedAt),
+                  icon: Icons.play_arrow_outlined,
+                ),
+                const Spacer(),
+                _InfoItem(
+                  label: 'Completion Time',
+                  value: execution.completedAt != null ? dateFormat.format(execution.completedAt!) : '-',
+                  icon: Icons.stop_outlined,
+                ),
+                const Spacer(),
+                _InfoItem(
+                  label: 'Duration',
+                  value: execution.duration != null ? '${execution.duration!.inSeconds}s' : '-',
+                  icon: Icons.timer_outlined,
                 ),
               ],
             ),
@@ -118,69 +138,42 @@ class ExecutionDetailsPage extends ConsumerWidget {
       ),
     );
   }
-
-  Widget _buildStepsList(BuildContext context, List<ExecutionStep> steps) {
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: steps.length,
-      separatorBuilder: (context, index) => const SizedBox(height: AppLayout.spaceS),
-      itemBuilder: (context, index) {
-        final step = steps[index];
-        return _StepTile(step: step);
-      },
-    );
-  }
 }
 
-class _StepTile extends StatelessWidget {
-  final ExecutionStep step;
-  const _StepTile({required this.step});
+class _InfoItem extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+
+  const _InfoItem({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
-    IconData icon;
-    Color color;
-    
-    switch (step.status) {
-      case ExecutionStepStatus.pending:
-        icon = Icons.schedule;
-        color = AppColors.textDisabled;
-      case ExecutionStepStatus.running:
-        icon = Icons.sync;
-        color = AppColors.info;
-      case ExecutionStepStatus.success:
-        icon = Icons.check_circle;
-        color = AppColors.success;
-      case ExecutionStepStatus.failed:
-        icon = Icons.error;
-        color = AppColors.error;
-      case ExecutionStepStatus.skipped:
-        icon = Icons.skip_next;
-        color = AppColors.textDisabled;
-    }
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppLayout.cardRadius),
-        side: BorderSide(color: theme.colorScheme.outlineVariant),
-      ),
-      child: ListTile(
-        leading: Icon(icon, color: color),
-        title: Text(
-          step.nodeTitle,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 14, color: AppColors.textSecondary),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: theme.textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
+            ),
+          ],
         ),
-        subtitle: step.errorMessage != null
-            ? Text(step.errorMessage!, style: const TextStyle(color: AppColors.error))
-            : Text(step.status.name.toUpperCase()),
-        trailing: step.status == ExecutionStepStatus.running
-            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-            : null,
-      ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+        ),
+      ],
     );
   }
 }
