@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/services/services.dart';
 import '../../data/repositories/mock_execution_repository.dart';
 import '../../data/services/mock_recovery_agent.dart';
 import '../../data/services/mock_workflow_execution_simulator.dart';
@@ -13,7 +14,8 @@ final executionRepositoryProvider = Provider<ExecutionRepository>((ref) {
 
 final workflowExecutionSimulatorProvider = Provider<WorkflowExecutionSimulator>((ref) {
   final repo = ref.watch(executionRepositoryProvider);
-  return MockWorkflowExecutionSimulator(repo);
+  final notificationService = ref.watch(notificationServiceProvider);
+  return MockWorkflowExecutionSimulator(repo, notificationService);
 });
 
 final recoveryAgentProvider = Provider<RecoveryAgent>((ref) {

@@ -79,144 +79,149 @@ class _TimelineStepState extends State<_TimelineStep> {
 
     final duration = step.completedAt?.difference(step.startedAt);
 
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Timeline Column
-          Column(
-            children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
+    return Stack(
+      children: [
+        // Vertical connector line
+        if (!widget.isLast)
+          Positioned(
+            left: 15, // Centered in the 32px icon area (padding 4 + icon 24 / 2)
+            top: 32, // Start after the icon
+            bottom: 0,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              width: 2,
+              color: isRunning 
                   // ignore: deprecated_member_use
-                  color: color.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      if (isRunning)
-                        const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.info),
-                          ),
-                        ),
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        child: Icon(
-                          icon,
-                          key: ValueKey(icon),
-                          color: color,
-                          size: isRunning ? 14 : 20,
+                  ? AppColors.info.withOpacity(0.3) 
+                  : theme.colorScheme.outlineVariant,
+            ),
+          ),
+        
+        // Step Content
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Icon area
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                // ignore: deprecated_member_use
+                color: color.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    if (isRunning)
+                      const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.info),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              if (!widget.isLast)
-                Expanded(
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    width: 2,
-                    color: isRunning 
-                        // ignore: deprecated_member_use
-                        ? AppColors.info.withOpacity(0.3) 
-                        : theme.colorScheme.outlineVariant,
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(width: AppLayout.spaceM),
-          // Content Column
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: AppLayout.spaceL),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  InkWell(
-                    onTap: () => setState(() => _isExpanded = !_isExpanded),
-                    borderRadius: BorderRadius.circular(AppLayout.cardRadius),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              step.nodeTitle,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Row(
-                              children: [
-                                if (duration != null)
-                                  Text(
-                                    '${duration.inSeconds}s',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                const SizedBox(width: AppLayout.spaceS),
-                                Icon(
-                                  _isExpanded ? Icons.expand_less : Icons.expand_more,
-                                  size: 16,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 2),
-                        Row(
-                          children: [
-                            _NodeTypeChip(type: step.nodeType),
-                            const SizedBox(width: AppLayout.spaceS),
-                            AnimatedDefaultTextStyle(
-                              duration: const Duration(milliseconds: 300),
-                              style: theme.textTheme.labelSmall!.copyWith(
-                                color: color,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              child: Text(step.status.name.toUpperCase()),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 300),
-                    alignment: Alignment.topCenter,
-                    child: _isExpanded 
-                        ? _buildExpandedContent(context, step) 
-                        : const SizedBox(width: double.infinity),
-                  ),
-                  if (step.errorMessage != null && !_isExpanded) ...[
-                    const SizedBox(height: AppLayout.spaceS),
-                    Text(
-                      step.errorMessage!,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.error,
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      child: Icon(
+                        icon,
+                        key: ValueKey(icon),
+                        color: color,
+                        size: isRunning ? 14 : 20,
                       ),
                     ),
                   ],
-                ],
+                ),
               ),
             ),
-          ),
-        ],
-      ),
+            const SizedBox(width: AppLayout.spaceM),
+            
+            // Text Content area
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: AppLayout.spaceL),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    InkWell(
+                      onTap: () => setState(() => _isExpanded = !_isExpanded),
+                      borderRadius: BorderRadius.circular(AppLayout.cardRadius),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                step.nodeTitle,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  if (duration != null)
+                                    Text(
+                                      '${duration.inSeconds}s',
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  const SizedBox(width: AppLayout.spaceS),
+                                  Icon(
+                                    _isExpanded ? Icons.expand_less : Icons.expand_more,
+                                    size: 16,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              _NodeTypeChip(type: step.nodeType),
+                              const SizedBox(width: AppLayout.spaceS),
+                              AnimatedDefaultTextStyle(
+                                duration: const Duration(milliseconds: 300),
+                                style: theme.textTheme.labelSmall!.copyWith(
+                                  color: color,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                child: Text(step.status.name.toUpperCase()),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 300),
+                      alignment: Alignment.topCenter,
+                      child: _isExpanded 
+                          ? _buildExpandedContent(context, step) 
+                          : const SizedBox(width: double.infinity),
+                    ),
+                    if (step.errorMessage != null && !_isExpanded) ...[
+                      const SizedBox(height: AppLayout.spaceS),
+                      Text(
+                        step.errorMessage!,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: AppColors.error,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

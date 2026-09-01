@@ -1,14 +1,16 @@
 import 'dart:math';
+import '../../../../core/services/services.dart';
+import '../../../workflow_builder/domain/models/models.dart';
 import '../../domain/models/models.dart';
 import '../../domain/repositories/execution_repository.dart';
 import '../../domain/services/workflow_execution_simulator.dart';
-import '../../../workflow_builder/domain/models/models.dart';
 
 class MockWorkflowExecutionSimulator implements WorkflowExecutionSimulator {
   final ExecutionRepository _repository;
+  final NotificationService _notificationService;
   final _random = Random();
 
-  MockWorkflowExecutionSimulator(this._repository);
+  MockWorkflowExecutionSimulator(this._repository, this._notificationService);
 
   @override
   Future<String> simulate(
@@ -55,7 +57,7 @@ class MockWorkflowExecutionSimulator implements WorkflowExecutionSimulator {
     _runSimulation(
       execution,
       workflow,
-      ExecutionFailureConfig.none, // Don't fail on retry for simplicity
+      ExecutionFailureConfig.none,
       startIndex: failedStepIndex,
     );
   }
@@ -91,8 +93,6 @@ class MockWorkflowExecutionSimulator implements WorkflowExecutionSimulator {
       final node = workflow.nodes[i];
       final stepStartTime = DateTime.now();
       
-      // If retrying, we might already have the step record, or we just create/update it.
-      // For the mock, we'll try to find if it exists.
       final existingSteps = await _repository.getExecutionSteps(executionId);
       final existingStep = existingSteps.firstWhere((s) => s.nodeId == node.id, orElse: () => ExecutionStep(
         id: 'step_${stepStartTime.millisecondsSinceEpoch}_${node.id}',
@@ -116,6 +116,16 @@ class MockWorkflowExecutionSimulator implements WorkflowExecutionSimulator {
       }
 
       await Future.delayed(const Duration(seconds: 1));
+
+      // Notification logic: trigger real local notification for Notify or Send steps
+      if (node.type == WorkflowNodeType.action && 
+          (node.title.toLowerCase().contains('notify') || node.title.toLowerCase().contains('send'))) {
+        await _notificationService.showNotification(
+          id: node.id.hashCode,
+          title: 'Relay Automation',
+          body: 'Workflow step completed: ${node.title}',
+        );
+      }
 
       final shouldFail = (failureConfig.failAtNodeId == node.id) || (randomFailureIndex == i);
 
