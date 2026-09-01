@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../core/constants/constants.dart';
 import '../features/automations/presentation/pages/automations_page.dart';
 import '../features/automations/presentation/pages/automation_details_page.dart';
+import '../features/integrations/presentation/pages/integrations_page.dart';
 import '../features/workflow_builder/presentation/pages/create_automation_page.dart';
 import '../features/workflow_builder/presentation/pages/workflow_preview_page.dart';
 import '../features/executions/presentation/pages/execution_details_page.dart';
@@ -94,9 +95,7 @@ final appRouter = GoRouter(
           routes: [
             GoRoute(
               path: AppRoutes.integrations,
-              builder: (context, state) => const Scaffold(
-                body: Center(child: Text('Integrations')),
-              ),
+              builder: (context, state) => const IntegrationsPage(),
             ),
           ],
         ),

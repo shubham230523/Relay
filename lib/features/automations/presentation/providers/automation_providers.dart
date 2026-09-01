@@ -54,8 +54,8 @@ class AutomationNotifier extends StateNotifier<AsyncValue<String?>> {
       final workflow = await _ref.read(workflowProvider(automation.workflowId!).future);
       if (workflow == null) throw Exception('Workflow not found');
 
-      final simulator = _ref.read(workflowExecutionSimulatorProvider);
-      final executionId = await simulator.simulate(id, workflow);
+      final executor = _ref.read(workflowExecutorProvider);
+      final executionId = await executor.execute(id, workflow);
       
       state = AsyncValue.data(executionId);
     } catch (e, st) {

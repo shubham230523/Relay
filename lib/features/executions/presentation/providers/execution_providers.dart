@@ -3,6 +3,7 @@ import '../../../../core/services/services.dart';
 import '../../data/repositories/mock_execution_repository.dart';
 import '../../data/services/mock_recovery_agent.dart';
 import '../../data/services/mock_workflow_execution_simulator.dart';
+import '../../data/services/real_workflow_executor.dart';
 import '../../domain/models/models.dart';
 import '../../domain/repositories/execution_repository.dart';
 import '../../domain/services/services.dart';
@@ -16,6 +17,22 @@ final workflowExecutionSimulatorProvider = Provider<WorkflowExecutionSimulator>(
   final repo = ref.watch(executionRepositoryProvider);
   final notificationService = ref.watch(notificationServiceProvider);
   return MockWorkflowExecutionSimulator(repo, notificationService);
+});
+
+final workflowExecutorProvider = Provider<WorkflowExecutor>((ref) {
+  final repo = ref.watch(executionRepositoryProvider);
+  final notificationService = ref.watch(notificationServiceProvider);
+  final gmailService = ref.watch(gmailServiceProvider);
+  final sheetsService = ref.watch(sheetsServiceProvider);
+  final slackService = ref.watch(slackServiceProvider);
+  
+  return RealWorkflowExecutor(
+    repo,
+    notificationService,
+    gmailService,
+    sheetsService,
+    slackService,
+  );
 });
 
 final recoveryAgentProvider = Provider<RecoveryAgent>((ref) {
