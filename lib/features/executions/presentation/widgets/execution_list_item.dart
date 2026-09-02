@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/theme.dart';
 import '../../domain/models/models.dart';
@@ -16,6 +17,7 @@ class ExecutionListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final timeFormat = DateFormat('MMM dd, HH:mm');
 
     return Card(
       margin: EdgeInsets.zero,
@@ -33,7 +35,7 @@ class ExecutionListItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Execution #${execution.id.split('_').last}',
+                      execution.automationName,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -42,7 +44,7 @@ class ExecutionListItem extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          'Started: Just now', // Simplified for mock
+                          timeFormat.format(execution.startedAt),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: AppColors.textSecondary,
                           ),
@@ -52,7 +54,7 @@ class ExecutionListItem extends StatelessWidget {
                           const Text('•'),
                           const SizedBox(width: AppLayout.spaceS),
                           Text(
-                            'Duration: ${execution.duration!.inSeconds}s',
+                            '${execution.duration!.inSeconds}s',
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: AppColors.textSecondary,
                             ),

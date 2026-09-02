@@ -19,6 +19,7 @@ dependencies:
   googleapis_auth: ^1.4.1
   extension_google_sign_in_as_googleapis_auth: ^3.0.0
   flutter_secure_storage: ^9.2.2
+  google_generative_ai: ^0.4.0
 
 dev_dependencies:
   flutter_test:

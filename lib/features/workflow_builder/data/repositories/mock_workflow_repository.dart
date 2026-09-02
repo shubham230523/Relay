@@ -1,8 +1,11 @@
 import '../../domain/models/models.dart';
 import '../../domain/repositories/workflow_repository.dart';
+import 'package:relay/features/templates/domain/models/mock_templates.dart';
 
 class MockWorkflowRepository implements WorkflowRepository {
-  final Map<String, Workflow> _workflows = {};
+  final Map<String, Workflow> _workflows = {
+    for (var t in MockTemplates.all) t.workflow.id: t.workflow,
+  };
 
   @override
   Future<Workflow> saveWorkflow(Workflow workflow) async {

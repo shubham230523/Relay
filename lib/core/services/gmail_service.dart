@@ -36,4 +36,25 @@ class GmailService {
       client.close();
     }
   }
+
+  Future<List<Message>> getFullMessages(List<String> ids) async {
+    final client = await _integrationService.getGoogleHttpClient();
+    if (client == null) throw Exception('Google account not connected');
+
+    try {
+      final gmail = GmailApi(client);
+      final List<Message> fullMessages = [];
+      
+      // Fetch details for the first 5 messages to avoid hitting rate limits or taking too long
+      final limit = ids.length > 5 ? 5 : ids.length;
+      for (int i = 0; i < limit; i++) {
+        final msg = await gmail.users.messages.get('me', ids[i]);
+        fullMessages.add(msg);
+      }
+      
+      return fullMessages;
+    } finally {
+      client.close();
+    }
+  }
 }

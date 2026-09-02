@@ -176,9 +176,16 @@ class MockExecutionRepository implements ExecutionRepository {
     // Yield current value
     yield List.unmodifiable(_executionSteps[executionId] ?? []);
     
-    // Yield updates
-    // In a real app we'd filter the stream by executionId. 
-    // Here we assume only one execution runs at a time or simplify for mock.
-    yield* _stepsController.stream;
+    // Yield updates for this specific execution
+    // Note: In this mock, _stepsController receives the updated list for the relevant execution
+    // so we just need to ensure we only yield if it matches the current executionId.
+    // However, the current _stepsController.add sends the list without context.
+    // Let's improve the controller to handle multiple executions if needed, 
+    // but for now, we'll just yield the latest state whenever ANY step updates, 
+    // which works because each listener will re-check _executionSteps[executionId].
+    
+    await for (final _ in _stepsController.stream) {
+      yield List.unmodifiable(_executionSteps[executionId] ?? []);
+    }
   }
 }

@@ -8,10 +8,11 @@ class AutomationsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const PageContainer(
+    return PageContainer(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        mainAxisSize: MainAxisSize.min,
+        children: const [
           AutomationsHeader(),
           SizedBox(height: AppLayout.spaceL),
           AutomationSearchBar(),

@@ -99,9 +99,12 @@ class _IntegrationServiceTile extends StatelessWidget {
       child: ListTile(
         leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
         title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-        trailing: ElevatedButton(
-          onPressed: onConnect,
-          child: const Text('Connect'),
+        trailing: SizedBox(
+          width: 100,
+          child: ElevatedButton(
+            onPressed: onConnect,
+            child: const Text('Connect'),
+          ),
         ),
       ),
     );
@@ -119,9 +122,12 @@ class _ConnectedAccountCard extends ConsumerWidget {
         leading: const CircleAvatar(child: Icon(Icons.person)),
         title: Text(account.displayName, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(account.email),
-        trailing: TextButton(
-          onPressed: () => ref.read(integrationActionsProvider.notifier).disconnect(account.id),
-          child: const Text('Disconnect', style: TextStyle(color: Colors.red)),
+        trailing: SizedBox(
+          width: 100,
+          child: TextButton(
+            onPressed: () => ref.read(integrationActionsProvider.notifier).disconnect(account.id),
+            child: const Text('Disconnect', style: TextStyle(color: Colors.red)),
+          ),
         ),
       ),
     );

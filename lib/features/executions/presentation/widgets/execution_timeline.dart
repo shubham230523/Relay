@@ -81,14 +81,13 @@ class _TimelineStepState extends State<_TimelineStep> {
 
     return Stack(
       children: [
-        // Vertical connector line
+        // Vertical connector line - positioned behind everything
         if (!widget.isLast)
           Positioned(
-            left: 15, // Centered in the 32px icon area (padding 4 + icon 24 / 2)
-            top: 32, // Start after the icon
+            left: 15, // Centered in the 32px area
+            top: 28, // Start below icon center
             bottom: 0,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
+            child: Container(
               width: 2,
               color: isRunning 
                   // ignore: deprecated_member_use
@@ -101,41 +100,48 @@ class _TimelineStepState extends State<_TimelineStep> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Icon area
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                // ignore: deprecated_member_use
-                color: color.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: SizedBox(
-                width: 24,
-                height: 24,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    if (isRunning)
-                      const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.info),
-                        ),
-                      ),
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      child: Icon(
-                        icon,
-                        key: ValueKey(icon),
-                        color: color,
-                        size: isRunning ? 14 : 20,
+            // Icon area - fixed width to match line positioning
+            SizedBox(
+              width: 32,
+              child: Column(
+                children: [
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      // ignore: deprecated_member_use
+                      color: color.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          if (isRunning)
+                            const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(AppColors.info),
+                              ),
+                            ),
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            child: Icon(
+                              icon,
+                              key: ValueKey(icon),
+                              color: color,
+                              size: isRunning ? 14 : 20,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(width: AppLayout.spaceM),
@@ -156,13 +162,17 @@ class _TimelineStepState extends State<_TimelineStep> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                step.nodeTitle,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
+                              Expanded(
+                                child: Text(
+                                  step.nodeTitle,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   if (duration != null)
                                     Text(
@@ -196,16 +206,17 @@ class _TimelineStepState extends State<_TimelineStep> {
                               ),
                             ],
                           ),
+                          if (!_isExpanded && step.status == ExecutionStepStatus.success && step.output != null) ...[
+                            const SizedBox(height: AppLayout.spaceS),
+                            _buildCompactOutput(context, step.output!),
+                          ],
                         ],
                       ),
                     ),
-                    AnimatedSize(
-                      duration: const Duration(milliseconds: 300),
-                      alignment: Alignment.topCenter,
-                      child: _isExpanded 
-                          ? _buildExpandedContent(context, step) 
-                          : const SizedBox(width: double.infinity),
-                    ),
+                    if (_isExpanded)
+                      _buildExpandedContent(context, step)
+                    else
+                      const SizedBox.shrink(),
                     if (step.errorMessage != null && !_isExpanded) ...[
                       const SizedBox(height: AppLayout.spaceS),
                       Text(
@@ -222,6 +233,42 @@ class _TimelineStepState extends State<_TimelineStep> {
           ],
         ),
       ],
+    );
+
+
+  }
+
+  Widget _buildCompactOutput(BuildContext context, Map<String, dynamic> output) {
+    final theme = Theme.of(context);
+    String? displayText;
+
+    if (output.containsKey('summary')) {
+      displayText = output['summary'];
+    } else if (output.containsKey('count')) {
+      displayText = 'Processed ${output['count']} items';
+    } else if (output.containsKey('status')) {
+      displayText = output['status'];
+    }
+
+    if (displayText == null || displayText.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: AppLayout.spaceS, vertical: 4),
+      decoration: BoxDecoration(
+        // ignore: deprecated_member_use
+        color: AppColors.primary.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        displayText,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.primary,
+          fontStyle: FontStyle.italic,
+        ),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
     );
   }
 

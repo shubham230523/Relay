@@ -11,27 +11,31 @@ class AutomationStatusFilter extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedStatus = ref.watch(automationStatusFilterProvider);
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          _FilterChip(
-            label: 'All',
-            isSelected: selectedStatus == null,
-            onTap: () => ref.read(automationStatusFilterProvider.notifier).state = null,
-          ),
-          const SizedBox(width: AppLayout.spaceS),
-          ...AutomationStatus.values.map((status) {
-            return Padding(
-              padding: const EdgeInsets.only(right: AppLayout.spaceS),
-              child: _FilterChip(
-                label: _getStatusLabel(status),
-                isSelected: selectedStatus == status,
-                onTap: () => ref.read(automationStatusFilterProvider.notifier).state = status,
-              ),
-            );
-          }),
-        ],
+    return SizedBox(
+      height: 48, // Fixed height for horizontal filter bar
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _FilterChip(
+              label: 'All',
+              isSelected: selectedStatus == null,
+              onTap: () => ref.read(automationStatusFilterProvider.notifier).state = null,
+            ),
+            const SizedBox(width: AppLayout.spaceS),
+            ...AutomationStatus.values.map((status) {
+              return Padding(
+                padding: const EdgeInsets.only(right: AppLayout.spaceS),
+                child: _FilterChip(
+                  label: _getStatusLabel(status),
+                  isSelected: selectedStatus == status,
+                  onTap: () => ref.read(automationStatusFilterProvider.notifier).state = status,
+                ),
+              );
+            }),
+          ],
+        ),
       ),
     );
   }

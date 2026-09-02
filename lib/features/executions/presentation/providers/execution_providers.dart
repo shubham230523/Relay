@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/services/services.dart';
+import 'package:relay/core/services/services.dart';
 import '../../data/repositories/mock_execution_repository.dart';
 import '../../data/services/mock_recovery_agent.dart';
 import '../../data/services/mock_workflow_execution_simulator.dart';
@@ -7,7 +7,7 @@ import '../../data/services/real_workflow_executor.dart';
 import '../../domain/models/models.dart';
 import '../../domain/repositories/execution_repository.dart';
 import '../../domain/services/services.dart';
-import '../../../automations/presentation/providers/automation_providers.dart';
+import 'package:relay/features/automations/presentation/providers/automation_providers.dart';
 
 final executionRepositoryProvider = Provider<ExecutionRepository>((ref) {
   return MockExecutionRepository();
@@ -25,6 +25,7 @@ final workflowExecutorProvider = Provider<WorkflowExecutor>((ref) {
   final gmailService = ref.watch(gmailServiceProvider);
   final sheetsService = ref.watch(sheetsServiceProvider);
   final slackService = ref.watch(slackServiceProvider);
+  final aiService = ref.watch(aiServiceProvider);
   
   return RealWorkflowExecutor(
     repo,
@@ -32,6 +33,7 @@ final workflowExecutorProvider = Provider<WorkflowExecutor>((ref) {
     gmailService,
     sheetsService,
     slackService,
+    aiService,
   );
 });
 

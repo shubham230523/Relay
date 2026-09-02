@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:relay/core/constants/api_constants.dart';
 import '../../domain/models/models.dart';
 import '../../domain/repositories/integration_repository.dart';
 
@@ -9,9 +10,13 @@ class RealIntegrationRepository implements IntegrationRepository {
   final List<IntegrationAccount> _accounts = [];
   final _controller = StreamController<List<IntegrationAccount>>.broadcast();
 
+  RealIntegrationRepository();
+
   Future<void> _ensureInitialized() async {
     if (_isInitialized) return;
-    await GoogleSignIn.instance.initialize();
+    await GoogleSignIn.instance.initialize(
+      clientId: ApiConstants.googleClientId,
+    );
     _isInitialized = true;
   }
 

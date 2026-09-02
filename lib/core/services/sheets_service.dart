@@ -18,6 +18,15 @@ class SheetsService {
 
     try {
       final sheets = SheetsApi(client);
+      
+      // If no spreadsheetId is provided, we can't really guess one. 
+      // For demo purposes, if it's 'default_sheet', we might log it or throw a descriptive error.
+      if (spreadsheetId == 'default_sheet') {
+        // In a real scenario, the user would select a sheet in the UI.
+        // For now, we'll try to append to whatever ID is provided.
+        // If it fails, the error will bubble up to the execution timeline.
+      }
+
       final valueRange = ValueRange.fromJson({
         'values': [values]
       });
@@ -27,7 +36,13 @@ class SheetsService {
         spreadsheetId,
         range,
         valueInputOption: 'RAW',
+        insertDataOption: 'INSERT_ROWS',
       );
+    } catch (e) {
+      if (e.toString().contains('404')) {
+        throw Exception('Spreadsheet not found. Please ensure the ID is correct and you have access.');
+      }
+      rethrow;
     } finally {
       client.close();
     }

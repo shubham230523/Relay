@@ -39,6 +39,14 @@ class PageContainer extends StatelessWidget {
       child: child,
     );
 
+    if (isScrollable) {
+      content = SingleChildScrollView(
+        controller: scrollController,
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: content,
+      );
+    }
+
     if (maxWidth != null) {
       content = Align(
         alignment: alignment,
@@ -46,14 +54,6 @@ class PageContainer extends StatelessWidget {
           constraints: BoxConstraints(maxWidth: maxWidth!),
           child: content,
         ),
-      );
-    }
-
-    if (isScrollable) {
-      return SingleChildScrollView(
-        controller: scrollController,
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: content,
       );
     }
 
