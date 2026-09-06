@@ -8,11 +8,21 @@ Instead of manually configuring triggers, conditions, and actions, users simply 
 
 > **Describe the work. Let Relay handle the rest.**
 
+## 🚧 Development Status & Prototype Disclaimer
+
+**Relay is a prototype and not currently intended for enterprise-level production use.**
+
+While the repository contains **actual functional code** and direct integrations with the Make.com API, it is primarily a proof-of-concept for AI-driven automation. To transition this into an enterprise-ready application, several critical steps are required:
+
+1.  **End-to-End Testing**: Comprehensive automated testing for all automation flows and edge cases is necessary to ensure reliability.
+2.  **Credential Management**: Users must provide their own **Google Cloud Console Credentials** (Client ID and Client Secret) and **Make.com API Tokens** to enable real-world functionality.
+3.  **Security Hardening**: Further validation of credential storage and API communication patterns.
+
 ## ✨ Features & Capabilities
 
 *   **Natural Language to Workflow**: Convert plain text instructions into structured, executable automations.
 *   **Multi-Platform Support**: Built with Flutter for Android, iOS, Web, and Desktop.
-*   **Deep Integrations**: Direct support for Google Services (Gmail, Sheets) and professional automation platforms like **Make.com**.
+*   **Deep Integrations**: Direct support for professional automation platforms like **Make.com**.
 *   **AI-Native**: Powered by Google Gemini for intelligent decision-making and data extraction.
 *   **Agentic Recovery**: Automated monitoring and failure analysis with self-healing capabilities.
 
@@ -31,15 +41,15 @@ Instead of manually configuring triggers, conditions, and actions, users simply 
 
 ### Integrations & Backend
 *   **Make.com (Integromat)**: Programmatic scenario management via Make REST API v2.
-*   **Google Workspace**: Integrated Gmail and Google Sheets support via `googleapis` and OAuth 2.0.
+*   **Google Workspace**: Integration-ready via Google Cloud OAuth 2.0 (requires user-provided Client ID/Secret).
 *   **Communication**: [HTTP](https://pub.dev/packages/http) for custom REST integrations.
 
 ## 🏗️ Project Structure
 
 The project follows a **Feature-First Clean Architecture**:
 
-*   `lib/core`: Global constants, shared widgets, and base services (Slack, Gmail, Sheets).
-*   `lib/features/integrations`: Management of external accounts (Google, Make, Slack).
+*   `lib/core`: Global constants, shared widgets, and base services.
+*   `lib/features/integrations`: Management of external accounts (Make, Google Cloud).
 *   `lib/features/automations`: The core engine for listing, creating, and managing workflows.
 *   `lib/features/workflow_builder`: UI and logic for translating natural language into automation nodes.
 *   `lib/features/dashboard`: High-level overview of execution stats and recent activities.
@@ -61,8 +71,8 @@ graph TD
 
 *   [x] Feature-First Flutter Foundation
 *   [x] Make.com API Integration
-*   [x] Google Sign-In & Workspace Scopes
-*   [x] Secure API Key Storage
+*   [x] Secure Credential Persistence
+*   [x] Template-based Automation Creation
 *   [ ] Real-time Execution Logs
 *   [ ] Visual Node-Based Workflow Editor
 *   [ ] Advanced Agentic Recovery (Self-Healing)
@@ -71,8 +81,8 @@ graph TD
 ## 🔐 Security
 
 Relay prioritizes user privacy and security:
-*   **OAuth 2.0**: Uses industry-standard authorization for Google services.
-*   **Local Encryption**: API Tokens (like Make.com keys) are stored in the device's secure enclave (Keychain/Keystore).
+*   **OAuth 2.0**: Uses industry-standard authorization for external services.
+*   **Local Encryption**: API Tokens and Secrets are stored in the device's secure enclave (Keychain/Keystore).
 *   **Minimal Permissions**: We only request the specific scopes needed for your automations.
 
 ---
