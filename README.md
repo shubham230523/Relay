@@ -20,6 +20,7 @@ While the repository contains **actual functional code** and direct integrations
 
 ## ✨ Features & Capabilities
 
+*   **🌐 Live Demo**: [View the Web Version on GitHub Pages](https://shubham230523.github.io/Relay/)
 *   **Natural Language to Workflow**: Convert plain text instructions into structured, executable automations.
 *   **Multi-Platform Support**: Built with Flutter for Android, iOS, Web, and Desktop.
 *   **Deep Integrations**: Direct support for professional automation platforms like **Make.com**.

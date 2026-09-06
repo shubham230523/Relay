@@ -1,0 +1,102 @@
+name: CI/CD - Build and Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.13.0' # Matching pubspec.yaml
+          channel: 'stable'
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Build APK
+        run: flutter build apk --release
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-release
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.13.0'
+          channel: 'stable'
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Build Windows
+        run: flutter build windows --release
+      - name: Zip Windows Build
+        run: Compress-Archive -Path build/windows/runner/Release/* -DestinationPath build/windows/relay-windows.zip
+      - name: Upload Windows Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-release
+          path: build/windows/relay-windows.zip
+
+  build-web-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.13.0'
+          channel: 'stable'
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Build Web
+        run: flutter build web --release --base-href "/Relay/"
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
+
+  create-release:
+    needs: [build-android, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Android Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: android-release
+      - name: Download Windows Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: windows-release
+      - name: Create Continuous Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: continuous-build
+          name: Latest Continuous Build
+          body: |
+            This release contains the latest automated builds from the master branch.
+            
+            Last updated: ${{ github.event.head_commit.timestamp }}
+            Commit: ${{ github.sha }}
+          files: |
+            app-release.apk
+            relay-windows.zip
+          draft: false
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
