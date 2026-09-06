@@ -30,10 +30,18 @@ class IntegrationActionsNotifier extends StateNotifier<AsyncValue<void>> {
     }
   }
 
-  Future<void> connectMake(String token) async {
+  Future<void> connectMake(
+    String apiToken,
+    String clientId,
+    String clientSecret,
+  ) async {
     state = const AsyncValue.loading();
     try {
-      await _repository.connectMakeAccount(token);
+      await _repository.connectMakeAccount(
+        apiToken,
+        clientId,
+        clientSecret,
+      );
       state = const AsyncValue.data(null);
     } catch (e, st) {
       debugPrint('Error connecting Make account: $e');

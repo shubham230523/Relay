@@ -90,25 +90,50 @@ class IntegrationsPage extends ConsumerWidget {
   }
 
   void _showMakeTokenDialog(BuildContext context, WidgetRef ref) {
-    final controller = TextEditingController();
+    final apiTokenController = TextEditingController();
+    final clientIdController = TextEditingController();
+    final clientSecretController = TextEditingController();
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Connect Make.com'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Enter your Make API Token (v2). You can find it in your Profile > API settings.'),
-            const SizedBox(height: AppLayout.spaceM),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'API Token',
-                border: OutlineInputBorder(),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Enter your Make API Token (v2). You can find it in your Profile > API settings.'),
+              const SizedBox(height: AppLayout.spaceM),
+              TextField(
+                controller: apiTokenController,
+                decoration: const InputDecoration(
+                  labelText: 'API Token',
+                  border: OutlineInputBorder(),
+                ),
+                obscureText: true,
               ),
-              obscureText: true,
-            ),
-          ],
+              const SizedBox(height: AppLayout.spaceL),
+              const Text('Google Cloud Console Credentials (for Gmail/Sheets integrations):', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: AppLayout.spaceM),
+              TextField(
+                controller: clientIdController,
+                decoration: const InputDecoration(
+                  labelText: 'Google Client ID',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: AppLayout.spaceM),
+              TextField(
+                controller: clientSecretController,
+                decoration: const InputDecoration(
+                  labelText: 'Google Client Secret',
+                  border: OutlineInputBorder(),
+                ),
+                obscureText: true,
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -117,8 +142,13 @@ class IntegrationsPage extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              if (controller.text.isNotEmpty) {
-                ref.read(integrationActionsProvider.notifier).connectMake(controller.text);
+              final apiToken = apiTokenController.text.trim();
+              final clientId = clientIdController.text.trim();
+              final clientSecret = clientSecretController.text.trim();
+              
+              if (apiToken.isNotEmpty) {
+                final notifier = ref.read(integrationActionsProvider.notifier);
+                notifier.connectMake(apiToken, clientId, clientSecret);
                 Navigator.pop(context);
               }
             },

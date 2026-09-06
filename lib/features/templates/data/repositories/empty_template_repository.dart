@@ -11,4 +11,9 @@ class EmptyTemplateRepository implements TemplateRepository {
   Future<AutomationTemplate?> getTemplateById(String id) async {
     return null;
   }
+
+  @override
+  Future<String?> getTemplateBlueprint(String id) async {
+    return null;
+  }
 }

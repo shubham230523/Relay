@@ -23,7 +23,11 @@ final automationRepositoryProvider = Provider<AutomationRepository>((ref) {
   );
 
   if (makeAccount.id.isNotEmpty) {
-    return MakeAutomationRepository(apiToken: makeAccount.accessToken!);
+    return MakeAutomationRepository(
+      apiToken: makeAccount.accessToken!,
+      clientId: makeAccount.clientId,
+      clientSecret: makeAccount.clientSecret,
+    );
   }
 
   return EmptyAutomationRepository();

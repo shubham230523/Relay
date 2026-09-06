@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:relay/core/constants/api_constants.dart';
 import '../../domain/models/models.dart';
@@ -7,11 +8,15 @@ import '../../domain/repositories/automation_repository.dart';
 class MakeAutomationRepository implements AutomationRepository {
   final String apiToken;
   final String baseUrl;
+  final String? clientId;
+  final String? clientSecret;
   int? _teamId;
 
   MakeAutomationRepository({
     required this.apiToken,
     this.baseUrl = ApiConstants.makeBaseUrl,
+    this.clientId,
+    this.clientSecret,
   });
 
   Map<String, String> get _headers => {
@@ -85,7 +90,8 @@ class MakeAutomationRepository implements AutomationRepository {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return _mapToAutomation(data['scenario']);
+      final scenarioData = data['scenario'] ?? data;
+      return _mapToAutomation(scenarioData as Map<String, dynamic>?);
     } else if (response.statusCode == 404) {
       return null;
     } else {
@@ -110,10 +116,10 @@ class MakeAutomationRepository implements AutomationRepository {
             'version': 1,
           },
         }),
-        'scheduling': {
-          'type': 'indefinite',
+        'scheduling': jsonEncode({
+          'type': 'indefinitely',
           'interval': 900,
-        },
+        }),
       }),
     );
 
@@ -122,6 +128,97 @@ class MakeAutomationRepository implements AutomationRepository {
       return _mapToAutomation(data['scenario']);
     } else {
       throw Exception('Failed to create scenario in Make: ${response.body}');
+    }
+  }
+
+  Future<int?> _findGoogleConnectionId(int teamId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/connections?teamId=$teamId'),
+      headers: _headers,
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final List connections = data['connections'] ?? [];
+      for (var conn in connections) {
+        final accountName = conn['accountName']?.toString().toLowerCase() ?? '';
+        if (accountName == 'google' || accountName == 'google-restricted') {
+          return conn['id'];
+        }
+      }
+    }
+    return null;
+  }
+
+  Future<int> _createGoogleConnection(int teamId) async {
+    if (clientId == null || clientSecret == null) {
+      throw Exception('Google Client ID and Secret are required to create a connection.');
+    }
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/connections'),
+      headers: _headers,
+      body: jsonEncode({
+        'name': 'Relay Google Connection',
+        'teamId': teamId,
+        'accountName': 'google-restricted', // Standard for Gmail/Sheets
+        'clientId': clientId,
+        'clientSecret': clientSecret,
+      }),
+    );
+
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['connection']['id'];
+    } else {
+      throw Exception('Failed to create Google connection in Make: ${response.body}');
+    }
+  }
+
+  @override
+  Future<Automation> createAutomationFromTemplate({
+    required String name,
+    required String blueprint,
+    required String templateId,
+  }) async {
+    final teamId = await _ensureTeamId();
+
+    // 1. Try to find or create a Google connection
+    int? connectionId = await _findGoogleConnectionId(teamId);
+    if (connectionId == null && clientId != null && clientSecret != null) {
+      connectionId = await _createGoogleConnection(teamId);
+      // Note: This connection will need authorization via Make UI or OAuth flow
+      debugPrint('Created new Google connection with ID: $connectionId. It may need authorization.');
+    }
+
+    // 2. Inject connection ID into blueprint if found
+    String finalBlueprint = blueprint;
+    if (connectionId != null) {
+      finalBlueprint = blueprint.replaceAll(RegExp(r'"__IMTCONN__":\s*\d+'), '"__IMTCONN__": $connectionId');
+      finalBlueprint = finalBlueprint.replaceAll(RegExp(r'"__IMTCONN__":\s*null'), '"__IMTCONN__": $connectionId');
+    }
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/scenarios'),
+      headers: _headers,
+      body: jsonEncode({
+        'name': name,
+        'teamId': teamId,
+        'blueprint': finalBlueprint,
+        'basedon': int.tryParse(templateId),
+        'scheduling': jsonEncode({
+          'type': 'indefinitely',
+          'interval': 900,
+        }),
+      }),
+    );
+
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final scenarioData = data['scenario'] ?? data;
+      return _mapToAutomation(scenarioData as Map<String, dynamic>?);
+    } else {
+      throw Exception('Failed to create scenario from template in Make: ${response.body}');
     }
   }
 
@@ -138,7 +235,8 @@ class MakeAutomationRepository implements AutomationRepository {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return _mapToAutomation(data['scenario']);
+      final scenarioData = data['scenario'] ?? data;
+      return _mapToAutomation(scenarioData as Map<String, dynamic>?);
     } else {
       throw Exception('Failed to update scenario in Make');
     }
@@ -173,22 +271,37 @@ class MakeAutomationRepository implements AutomationRepository {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return _mapToAutomation(data['scenario']);
+      final scenarioData = data['scenario'] ?? data;
+      return _mapToAutomation(scenarioData as Map<String, dynamic>?);
     } else {
       throw Exception('Failed to toggle status in Make');
     }
   }
 
-  Automation _mapToAutomation(Map<String, dynamic> json) {
+  Automation _mapToAutomation(Map<String, dynamic>? json) {
+    if (json == null) {
+      throw Exception('Received null scenario data from Make.com');
+    }
+
+    // Safely parse dates with fallbacks
+    DateTime parseDate(dynamic value) {
+      if (value == null) return DateTime.now();
+      try {
+        return DateTime.parse(value.toString());
+      } catch (_) {
+        return DateTime.now();
+      }
+    }
+
     return Automation(
-      id: json['id'].toString(),
+      id: (json['id'] ?? 'unknown').toString(),
       name: json['name'] ?? 'Untitled',
       description: json['description'] ?? '',
       status: _mapStatus(json['active'], json['draft']),
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
-      lastExecutedAt: json['lastRun'] != null ? DateTime.parse(json['lastRun']) : null,
-      workflowId: json['id'].toString(), // Using scenario ID as workflow ID for now
+      createdAt: parseDate(json['createdAt']),
+      updatedAt: parseDate(json['updatedAt']),
+      lastExecutedAt: json['lastRun'] != null ? parseDate(json['lastRun']) : null,
+      workflowId: (json['id'] ?? '').toString(),
     );
   }
 

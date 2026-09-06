@@ -18,6 +18,15 @@ class EmptyAutomationRepository implements AutomationRepository {
   }
 
   @override
+  Future<Automation> createAutomationFromTemplate({
+    required String name,
+    required String blueprint,
+    required String templateId,
+  }) async {
+    throw Exception('No account connected');
+  }
+
+  @override
   Future<Automation> updateAutomation(Automation automation) async {
     return automation;
   }

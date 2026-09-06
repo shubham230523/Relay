@@ -51,7 +51,10 @@ class TemplatesPage extends ConsumerWidget {
 
               return LayoutBuilder(
                 builder: (context, constraints) {
-                  final crossAxisCount = constraints.maxWidth > 1000 ? 3 : constraints.maxWidth > 600 ? 2 : 1;
+                  final isDesktop = constraints.maxWidth > 900;
+                  final isTablet = constraints.maxWidth > 500;
+                  final crossAxisCount = isDesktop ? 3 : isTablet ? 2 : 1;
+                  final aspectRatio = isDesktop ? 1.6 : isTablet ? 1.5 : 1.3;
 
                   return GridView.builder(
                     shrinkWrap: true,
@@ -60,7 +63,7 @@ class TemplatesPage extends ConsumerWidget {
                       crossAxisCount: crossAxisCount,
                       crossAxisSpacing: AppLayout.spaceM,
                       mainAxisSpacing: AppLayout.spaceM,
-                      childAspectRatio: 1.2,
+                      childAspectRatio: aspectRatio,
                     ),
                     itemCount: templatesList.length,
                     itemBuilder: (context, index) {

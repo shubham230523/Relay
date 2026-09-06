@@ -15,6 +15,8 @@ class IntegrationAccount {
   final bool isConnected;
   final DateTime connectedAt;
   final String? accessToken;
+  final String? clientId;
+  final String? clientSecret;
 
   const IntegrationAccount({
     required this.id,
@@ -24,6 +26,8 @@ class IntegrationAccount {
     this.isConnected = true,
     required this.connectedAt,
     this.accessToken,
+    this.clientId,
+    this.clientSecret,
   });
 
   Map<String, dynamic> toJson() {
@@ -35,6 +39,8 @@ class IntegrationAccount {
       'isConnected': isConnected,
       'connectedAt': connectedAt.toIso8601String(),
       'accessToken': accessToken,
+      'clientId': clientId,
+      'clientSecret': clientSecret,
     };
   }
 
@@ -47,12 +53,16 @@ class IntegrationAccount {
       isConnected: json['isConnected'],
       connectedAt: DateTime.parse(json['connectedAt']),
       accessToken: json['accessToken'],
+      clientId: json['clientId'],
+      clientSecret: json['clientSecret'],
     );
   }
 
   IntegrationAccount copyWith({
     bool? isConnected,
     String? accessToken,
+    String? clientId,
+    String? clientSecret,
   }) {
     return IntegrationAccount(
       id: id,
@@ -62,6 +72,8 @@ class IntegrationAccount {
       isConnected: isConnected ?? this.isConnected,
       connectedAt: connectedAt,
       accessToken: accessToken ?? this.accessToken,
+      clientId: clientId ?? this.clientId,
+      clientSecret: clientSecret ?? this.clientSecret,
     );
   }
 }

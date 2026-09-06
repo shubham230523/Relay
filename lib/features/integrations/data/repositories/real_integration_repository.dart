@@ -103,7 +103,11 @@ class RealIntegrationRepository implements IntegrationRepository {
   }
 
   @override
-  Future<IntegrationAccount> connectMakeAccount(String apiToken) async {
+  Future<IntegrationAccount> connectMakeAccount(
+    String apiToken,
+    String clientId,
+    String clientSecret,
+  ) async {
     await _ensureInitialized();
     // In a real app, you might validate the token with a simple API call here
     final account = IntegrationAccount(
@@ -113,6 +117,8 @@ class RealIntegrationRepository implements IntegrationRepository {
       serviceType: IntegrationServiceType.make,
       connectedAt: DateTime.now(),
       accessToken: apiToken,
+      clientId: clientId,
+      clientSecret: clientSecret,
     );
 
     final index = _accounts.indexWhere((a) => a.id == account.id);

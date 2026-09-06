@@ -87,16 +87,32 @@ class TemplateDetailsPage extends ConsumerWidget {
                 ],
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      ref.read(workflowGenerationProvider.notifier).reset();
-                      ref.read(workflowGenerationProvider.notifier).generateFromTemplate(
-                            template.workflow,
-                            'Based on template: ${template.name}',
-                          );
-                      context.push(AppRoutes.workflowDetails);
+                  child: Consumer(
+                    builder: (context, ref, child) {
+                      final actionsState = ref.watch(templateActionsProvider);
+                      final isLoading = actionsState.isLoading;
+
+                      ref.listen(templateActionsProvider, (previous, next) {
+                        if (next is AsyncData && next.value != null) {
+                          context.go(AppRoutes.automationDetails.replaceFirst(':id', next.value!.id));
+                        }
+                      });
+
+                      return ElevatedButton(
+                        onPressed: isLoading
+                            ? null
+                            : () {
+                                ref.read(templateActionsProvider.notifier).createFromTemplate(template);
+                              },
+                        child: isLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              )
+                            : const Text('Use Template'),
+                      );
                     },
-                    child: const Text('Use Template'),
                   ),
                 ),
                 const SizedBox(height: AppLayout.spaceXL),
