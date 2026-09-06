@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../../core/utils/utils.dart';
 import '../providers/workflow_builder_providers.dart';
 
 class CreateAutomationPage extends ConsumerStatefulWidget {
@@ -62,6 +63,7 @@ class _CreateAutomationPageState extends ConsumerState<CreateAutomationPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final generationState = ref.watch(workflowGenerationProvider);
+    final isMobile = AppBreakpoints.isMobile(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -78,7 +80,7 @@ class _CreateAutomationPageState extends ConsumerState<CreateAutomationPage> {
           children: [
             Text(
               'What would you like to automate?',
-              style: theme.textTheme.headlineLarge?.copyWith(
+              style: (isMobile ? theme.textTheme.headlineMedium : theme.textTheme.headlineLarge)?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
