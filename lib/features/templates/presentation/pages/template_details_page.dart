@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/widgets.dart';
+import '../../../../core/utils/utils.dart';
 import '../../../workflow_builder/domain/models/models.dart';
 import '../../../workflow_builder/presentation/providers/workflow_builder_providers.dart';
 import '../../../workflow_builder/presentation/widgets/widgets.dart';
@@ -18,6 +19,7 @@ class TemplateDetailsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final templateAsync = ref.watch(templateDetailsProvider(id));
     final theme = Theme.of(context);
+    final isMobile = AppBreakpoints.isMobile(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -28,43 +30,48 @@ class TemplateDetailsPage extends ConsumerWidget {
           if (template == null) {
             return const Center(child: Text('Template not found'));
           }
+
+          final header = Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppLayout.spaceS),
+                decoration: BoxDecoration(
+                  // ignore: deprecated_member_use
+                  color: theme.colorScheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppLayout.buttonRadius),
+                ),
+                child: Icon(template.icon, color: theme.colorScheme.primary, size: 32),
+              ),
+              const SizedBox(width: AppLayout.spaceM),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      template.name,
+                      style: (isMobile ? theme.textTheme.titleLarge : theme.textTheme.headlineSmall)?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      template.category.name.toUpperCase(),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: AppColors.textSecondary,
+                        letterSpacing: 1.1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+
           return PageContainer(
             maxWidth: 800,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(AppLayout.spaceS),
-                      decoration: BoxDecoration(
-                        // ignore: deprecated_member_use
-                        color: theme.colorScheme.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(AppLayout.buttonRadius),
-                      ),
-                      child: Icon(template.icon, color: theme.colorScheme.primary, size: 32),
-                    ),
-                    const SizedBox(width: AppLayout.spaceM),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            template.name,
-                            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            template.category.name.toUpperCase(),
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: AppColors.textSecondary,
-                              letterSpacing: 1.1,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                header,
                 const SizedBox(height: AppLayout.spaceL),
                 Text(
                   'Description',

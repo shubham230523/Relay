@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../../core/utils/utils.dart';
 import '../../domain/models/models.dart';
 import 'execution_status_badge.dart';
 
@@ -18,6 +19,7 @@ class ExecutionListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final timeFormat = DateFormat('MMM dd, HH:mm');
+    final isMobile = AppBreakpoints.isMobile(context);
 
     return Card(
       margin: EdgeInsets.zero,
@@ -36,9 +38,11 @@ class ExecutionListItem extends StatelessWidget {
                   children: [
                     Text(
                       execution.automationName,
-                      style: theme.textTheme.titleMedium?.copyWith(
+                      style: (isMobile ? theme.textTheme.titleSmall : theme.textTheme.titleMedium)?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: AppLayout.spaceXS),
                     Row(
@@ -49,7 +53,7 @@ class ExecutionListItem extends StatelessWidget {
                             color: AppColors.textSecondary,
                           ),
                         ),
-                        if (execution.duration != null) ...[
+                        if (execution.duration != null && !isMobile) ...[
                           const SizedBox(width: AppLayout.spaceS),
                           const Text('•'),
                           const SizedBox(width: AppLayout.spaceS),
@@ -65,7 +69,7 @@ class ExecutionListItem extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: AppLayout.spaceM),
+              const SizedBox(width: AppLayout.spaceS),
               ExecutionStatusBadge(status: execution.status),
             ],
           ),

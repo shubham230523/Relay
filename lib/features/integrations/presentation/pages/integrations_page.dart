@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/constants.dart';
+import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/widgets.dart';
+import '../../../../core/utils/utils.dart';
 import '../providers/integration_providers.dart';
 import '../../domain/models/models.dart';
 
@@ -12,6 +14,7 @@ class IntegrationsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final accountsAsync = ref.watch(connectedAccountsProvider);
     final theme = Theme.of(context);
+    final isMobile = AppBreakpoints.isMobile(context);
 
     // Log error if connection fails
     ref.listen(integrationActionsProvider, (previous, next) {
@@ -27,7 +30,7 @@ class IntegrationsPage extends ConsumerWidget {
         children: [
           Text(
             'Integrations',
-            style: theme.textTheme.headlineMedium?.copyWith(
+            style: (isMobile ? theme.textTheme.headlineSmall : theme.textTheme.headlineMedium)?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -63,10 +66,13 @@ class IntegrationsPage extends ConsumerWidget {
           accountsAsync.when(
             data: (accounts) {
               if (accounts.isEmpty) {
-                return const Center(
+                return Center(
                   child: Padding(
-                    padding: EdgeInsets.all(AppLayout.spaceXL),
-                    child: Text('No accounts connected yet.'),
+                    padding: const EdgeInsets.all(AppLayout.spaceXL),
+                    child: Text(
+                      'No accounts connected yet.',
+                      style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+                    ),
                   ),
                 );
               }
@@ -82,7 +88,7 @@ class IntegrationsPage extends ConsumerWidget {
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, st) => Text('Error: $err'),
+            error: (err, st) => Center(child: Text('Error: $err')),
           ),
         ],
       ),
@@ -175,20 +181,49 @@ class _IntegrationServiceTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final actionsState = ref.watch(integrationActionsProvider);
     final isLoading = actionsState.isLoading;
+    final isMobile = AppBreakpoints.isMobile(context);
+
+    final button = SizedBox(
+      width: isMobile ? double.infinity : 120,
+      child: ElevatedButton(
+        onPressed: isLoading ? null : onConnect,
+        child: isLoading
+            ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+            : const Text('Connect'),
+      ),
+    );
+
+    if (isMobile) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(AppLayout.spaceM),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Icon(icon, color: Theme.of(context).colorScheme.primary),
+                  const SizedBox(width: AppLayout.spaceM),
+                  Expanded(
+                    child: Text(
+                      name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppLayout.spaceM),
+              button,
+            ],
+          ),
+        ),
+      );
+    }
 
     return Card(
       child: ListTile(
         leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
         title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-        trailing: SizedBox(
-          width: 120,
-          child: ElevatedButton(
-            onPressed: isLoading ? null : onConnect,
-            child: isLoading 
-                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Text('Connect'),
-          ),
-        ),
+        trailing: button,
       ),
     );
   }
@@ -200,6 +235,53 @@ class _ConnectedAccountCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isMobile = AppBreakpoints.isMobile(context);
+    final theme = Theme.of(context);
+
+    final disconnectButton = TextButton(
+      onPressed: () => ref.read(integrationActionsProvider.notifier).disconnect(account.id),
+      child: const Text('Disconnect', style: TextStyle(color: Colors.red)),
+    );
+
+    if (isMobile) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(AppLayout.spaceM),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  const CircleAvatar(child: Icon(Icons.person)),
+                  const SizedBox(width: AppLayout.spaceM),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          account.displayName,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          account.email,
+                          style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppLayout.spaceS),
+              const Divider(),
+              SizedBox(
+                width: double.infinity,
+                child: disconnectButton,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Card(
       child: ListTile(
         leading: const CircleAvatar(child: Icon(Icons.person)),
@@ -207,10 +289,7 @@ class _ConnectedAccountCard extends ConsumerWidget {
         subtitle: Text(account.email),
         trailing: SizedBox(
           width: 100,
-          child: TextButton(
-            onPressed: () => ref.read(integrationActionsProvider.notifier).disconnect(account.id),
-            child: const Text('Disconnect', style: TextStyle(color: Colors.red)),
-          ),
+          child: disconnectButton,
         ),
       ),
     );

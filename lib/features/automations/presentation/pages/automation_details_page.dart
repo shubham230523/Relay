@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/widgets.dart';
+import '../../../../core/utils/utils.dart';
 import '../../../workflow_builder/domain/models/models.dart';
 import '../../../workflow_builder/presentation/widgets/widgets.dart';
 import '../../domain/models/models.dart';
@@ -58,6 +59,69 @@ class AutomationDetailsPage extends ConsumerWidget {
 
   Widget _buildHeader(BuildContext context, Automation automation) {
     final theme = Theme.of(context);
+    final isMobile = AppBreakpoints.isMobile(context);
+
+    final titleSection = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          automation.name,
+          style: (isMobile ? theme.textTheme.headlineSmall : theme.textTheme.headlineMedium)?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: AppLayout.spaceXS),
+        Text(
+          automation.description,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ],
+    );
+
+    final statusSection = Column(
+      crossAxisAlignment: isMobile ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+      children: [
+        _StatusBadge(status: automation.status),
+        const SizedBox(height: AppLayout.spaceM),
+        _RunNowButton(automationId: automation.id),
+      ],
+    );
+
+    final infoItems = Wrap(
+      spacing: AppLayout.spaceXL,
+      runSpacing: AppLayout.spaceM,
+      children: [
+        _InfoItem(
+          label: 'Created',
+          value: 'Aug 30, 2026', // Mock date formatting
+          icon: Icons.calendar_today_outlined,
+        ),
+        _InfoItem(
+          label: 'Last Run',
+          value: automation.lastExecutedAt != null ? '2 hours ago' : 'Never',
+          icon: Icons.history,
+        ),
+      ],
+    );
+
+    if (isMobile) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          titleSection,
+          const SizedBox(height: AppLayout.spaceL),
+          statusSection,
+          const SizedBox(height: AppLayout.spaceL),
+          const Divider(),
+          const SizedBox(height: AppLayout.spaceL),
+          infoItems,
+          const SizedBox(height: AppLayout.spaceL),
+          _buildStatusToggle(context, automation),
+        ],
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,56 +129,16 @@ class AutomationDetailsPage extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    automation.name,
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: AppLayout.spaceXS),
-                  Text(
-                    automation.description,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            Expanded(child: titleSection),
             const SizedBox(width: AppLayout.spaceM),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                _StatusBadge(status: automation.status),
-                const SizedBox(height: AppLayout.spaceM),
-                _RunNowButton(automationId: automation.id),
-              ],
-            ),
+            statusSection,
           ],
         ),
         const SizedBox(height: AppLayout.spaceL),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                _InfoItem(
-                  label: 'Created',
-                  value: 'Aug 30, 2026', // Mock date formatting
-                  icon: Icons.calendar_today_outlined,
-                ),
-                const SizedBox(width: AppLayout.spaceXL),
-                _InfoItem(
-                  label: 'Last Run',
-                  value: automation.lastExecutedAt != null ? '2 hours ago' : 'Never',
-                  icon: Icons.history,
-                ),
-              ],
-            ),
+            infoItems,
             _buildStatusToggle(context, automation),
           ],
         ),

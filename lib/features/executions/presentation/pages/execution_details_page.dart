@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/widgets.dart';
+import '../../../../core/utils/utils.dart';
 import '../widgets/widgets.dart';
 import '../providers/execution_providers.dart';
 import '../../../workflow_builder/domain/models/models.dart';
@@ -100,6 +101,7 @@ class ExecutionDetailsPage extends ConsumerWidget {
   Widget _buildHeader(BuildContext context, Execution execution) {
     final theme = Theme.of(context);
     final dateFormat = DateFormat('MMM dd, yyyy HH:mm:ss');
+    final isMobile = AppBreakpoints.isMobile(context);
 
     return Card(
       child: Padding(
@@ -120,7 +122,9 @@ class ExecutionDetailsPage extends ConsumerWidget {
                       ),
                       Text(
                         execution.automationName,
-                        style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                        style: (isMobile ? theme.textTheme.titleLarge : theme.textTheme.headlineSmall)?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -131,27 +135,57 @@ class ExecutionDetailsPage extends ConsumerWidget {
             const SizedBox(height: AppLayout.spaceL),
             const Divider(),
             const SizedBox(height: AppLayout.spaceL),
-            Row(
-              children: [
-                _InfoItem(
-                  label: 'Start time',
-                  value: dateFormat.format(execution.startedAt),
-                  icon: Icons.play_arrow_outlined,
-                ),
-                const Spacer(),
-                _InfoItem(
-                  label: 'Completion Time',
-                  value: execution.completedAt != null ? dateFormat.format(execution.completedAt!) : '-',
-                  icon: Icons.stop_outlined,
-                ),
-                const Spacer(),
-                _InfoItem(
-                  label: 'Duration',
-                  value: execution.duration != null ? '${execution.duration!.inSeconds}s' : '-',
-                  icon: Icons.timer_outlined,
-                ),
-              ],
-            ),
+            if (isMobile)
+              Column(
+                children: [
+                  _InfoItem(
+                    label: 'Start time',
+                    value: dateFormat.format(execution.startedAt),
+                    icon: Icons.play_arrow_outlined,
+                  ),
+                  const SizedBox(height: AppLayout.spaceM),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _InfoItem(
+                          label: 'Completion',
+                          value: execution.completedAt != null ? dateFormat.format(execution.completedAt!) : '-',
+                          icon: Icons.stop_outlined,
+                        ),
+                      ),
+                      Expanded(
+                        child: _InfoItem(
+                          label: 'Duration',
+                          value: execution.duration != null ? '${execution.duration!.inSeconds}s' : '-',
+                          icon: Icons.timer_outlined,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              )
+            else
+              Row(
+                children: [
+                  _InfoItem(
+                    label: 'Start time',
+                    value: dateFormat.format(execution.startedAt),
+                    icon: Icons.play_arrow_outlined,
+                  ),
+                  const Spacer(),
+                  _InfoItem(
+                    label: 'Completion Time',
+                    value: execution.completedAt != null ? dateFormat.format(execution.completedAt!) : '-',
+                    icon: Icons.stop_outlined,
+                  ),
+                  const Spacer(),
+                  _InfoItem(
+                    label: 'Duration',
+                    value: execution.duration != null ? '${execution.duration!.inSeconds}s' : '-',
+                    icon: Icons.timer_outlined,
+                  ),
+                ],
+              ),
           ],
         ),
       ),

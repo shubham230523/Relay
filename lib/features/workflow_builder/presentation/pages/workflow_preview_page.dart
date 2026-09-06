@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../../core/utils/utils.dart';
 import '../../domain/models/models.dart';
 import '../providers/workflow_builder_providers.dart';
 import '../widgets/widgets.dart';
@@ -16,6 +17,7 @@ class WorkflowPreviewPage extends ConsumerWidget {
     final state = ref.watch(workflowGenerationProvider);
     final workflow = state.workflow;
     final theme = Theme.of(context);
+    final isMobile = AppBreakpoints.isMobile(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -98,28 +100,43 @@ class WorkflowPreviewPage extends ConsumerWidget {
               const SizedBox(height: AppLayout.spaceXL),
 
               // Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => context.pop(),
-                      child: const Text('Edit Request'),
-                    ),
-                  ),
-                  const SizedBox(width: AppLayout.spaceM),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => _showApprovalDialog(context, workflow),
-                      child: const Text('Approve Workflow'),
-                    ),
-                  ),
-                ],
-              ),
+              _buildButtons(context, isMobile, workflow),
               const SizedBox(height: AppLayout.spaceXL),
             ],
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildButtons(BuildContext context, bool isMobile, Workflow workflow) {
+    final editButton = OutlinedButton(
+      onPressed: () => context.pop(),
+      child: const Text('Edit Request'),
+    );
+
+    final approveButton = ElevatedButton(
+      onPressed: () => _showApprovalDialog(context, workflow),
+      child: const Text('Approve Workflow'),
+    );
+
+    if (isMobile) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          approveButton,
+          const SizedBox(height: AppLayout.spaceS),
+          editButton,
+        ],
+      );
+    }
+
+    return Row(
+      children: [
+        Expanded(child: editButton),
+        const SizedBox(width: AppLayout.spaceM),
+        Expanded(child: approveButton),
+      ],
     );
   }
 

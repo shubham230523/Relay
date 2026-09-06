@@ -22,16 +22,19 @@ class PageContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final horizontalPadding = AppBreakpoints.isMobile(context)
+    final isMobile = AppBreakpoints.isMobile(context);
+    final horizontalPadding = isMobile
         ? AppLayout.screenPadding
         : AppBreakpoints.isTablet(context)
             ? AppLayout.spaceL
             : AppLayout.spaceXL;
 
+    final verticalPadding = isMobile ? AppLayout.spaceM : AppLayout.spaceXL;
+
     final effectivePadding = padding ??
         EdgeInsets.symmetric(
           horizontal: horizontalPadding,
-          vertical: AppLayout.spaceM,
+          vertical: verticalPadding,
         );
 
     Widget content = Padding(

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../../core/utils/utils.dart';
 import '../../domain/models/models.dart';
 import '../providers/automation_providers.dart';
 
@@ -17,6 +18,7 @@ class AutomationCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final isMobile = AppBreakpoints.isMobile(context);
 
     return Card(
       child: InkWell(
@@ -54,53 +56,56 @@ class AutomationCard extends ConsumerWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: AppLayout.spaceXS),
-                        Text(
-                          automation.description,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary,
+                        if (!isMobile) ...[
+                          const SizedBox(height: AppLayout.spaceXS),
+                          Text(
+                            automation.description,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        ],
                       ],
                     ),
                   ),
-                  const SizedBox(width: AppLayout.spaceM),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      _StatusBadge(status: automation.status),
-                      const SizedBox(height: AppLayout.spaceS),
-                      Switch.adaptive(
-                        value: automation.status == AutomationStatus.active,
-                        onChanged: (value) async {
-                          await ref.read(automationActionsProvider.notifier).toggleStatus(automation.id);
-                        },
-                      ),
-                    ],
-                  ),
+                  const SizedBox(width: AppLayout.spaceS),
+                  _StatusBadge(status: automation.status),
                 ],
               ),
+              if (isMobile) ...[
+                const SizedBox(height: AppLayout.spaceS),
+                Text(
+                  automation.description,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
               const SizedBox(height: AppLayout.spaceM),
               const Divider(),
               const SizedBox(height: AppLayout.spaceS),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    automation.lastExecutedAt != null
-                        ? 'Last executed: 2 hours ago' // Mock time formatting
-                        : 'Never executed',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
+                  Expanded(
+                    child: Text(
+                      automation.lastExecutedAt != null
+                          ? 'Last executed: 2 hours ago' // Mock time formatting
+                          : 'Never executed',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ),
-                  Text(
-                    'Workflow ID: ${automation.id}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                  Switch.adaptive(
+                    value: automation.status == AutomationStatus.active,
+                    onChanged: (value) async {
+                      await ref.read(automationActionsProvider.notifier).toggleStatus(automation.id);
+                    },
                   ),
                 ],
               ),
