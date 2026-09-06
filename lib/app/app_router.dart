@@ -16,7 +16,13 @@ final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(de
 
 final appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: AppRoutes.dashboard,
+  initialLocation: AppRoutes.automations,
+  redirect: (context, state) {
+    if (state.matchedLocation == AppRoutes.dashboard) {
+      return AppRoutes.automations;
+    }
+    return null;
+  },
   routes: [
     GoRoute(
       path: AppRoutes.createAutomation,
@@ -41,16 +47,6 @@ final appRouter = GoRouter(
         return MainShell(navigationShell: navigationShell);
       },
       branches: [
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: AppRoutes.dashboard,
-              builder: (context, state) => const Scaffold(
-                body: Center(child: Text('Dashboard')),
-              ),
-            ),
-          ],
-        ),
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -96,16 +92,6 @@ final appRouter = GoRouter(
             GoRoute(
               path: AppRoutes.integrations,
               builder: (context, state) => const IntegrationsPage(),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: AppRoutes.settings,
-              builder: (context, state) => const Scaffold(
-                body: Center(child: Text('Settings')),
-              ),
             ),
           ],
         ),

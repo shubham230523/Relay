@@ -38,44 +38,57 @@ class TemplatesPage extends ConsumerWidget {
           const SizedBox(height: AppLayout.spaceM),
           const TemplateCategoryFilter(),
           const SizedBox(height: AppLayout.spaceL),
-          if (templates.isEmpty)
-            const Center(
+          templates.when(
+            data: (templatesList) {
+              if (templatesList.isEmpty) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(AppLayout.spaceXL),
+                    child: Text('No templates found matching your criteria.'),
+                  ),
+                );
+              }
+
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  final crossAxisCount = constraints.maxWidth > 1000 ? 3 : constraints.maxWidth > 600 ? 2 : 1;
+
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      crossAxisSpacing: AppLayout.spaceM,
+                      mainAxisSpacing: AppLayout.spaceM,
+                      childAspectRatio: 1.2,
+                    ),
+                    itemCount: templatesList.length,
+                    itemBuilder: (context, index) {
+                      final template = templatesList[index];
+                      return TemplateCard(
+                        template: template,
+                        onTap: () {
+                          context.push(AppRoutes.templateDetails.replaceFirst(':id', template.id));
+                        },
+                      );
+                    },
+                  );
+                },
+              );
+            },
+            loading: () => const Center(
               child: Padding(
                 padding: EdgeInsets.all(AppLayout.spaceXL),
-                child: Text('No templates found matching your criteria.'),
+                child: CircularProgressIndicator(),
               ),
-            )
-          else
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final crossAxisCount = constraints.maxWidth > 1000 
-                    ? 3 
-                    : constraints.maxWidth > 600 
-                        ? 2 
-                        : 1;
-                
-                return GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount,
-                    crossAxisSpacing: AppLayout.spaceM,
-                    mainAxisSpacing: AppLayout.spaceM,
-                    childAspectRatio: 1.2,
-                  ),
-                  itemCount: templates.length,
-                  itemBuilder: (context, index) {
-                    final template = templates[index];
-                    return TemplateCard(
-                      template: template,
-                      onTap: () {
-                        context.push(AppRoutes.templateDetails.replaceFirst(':id', template.id));
-                      },
-                    );
-                  },
-                );
-              },
             ),
+            error: (err, st) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppLayout.spaceXL),
+                child: Text('Error: $err'),
+              ),
+            ),
+          ),
         ],
       ),
     );

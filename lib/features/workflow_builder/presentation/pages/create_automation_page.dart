@@ -51,9 +51,7 @@ class _CreateAutomationPageState extends ConsumerState<CreateAutomationPage> {
     if (mounted) {
       final state = ref.read(workflowGenerationProvider);
       if (state.error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${state.error}')),
-        );
+        debugPrint('Error generating workflow: ${state.error}');
       } else if (state.workflow != null) {
         context.push(AppRoutes.workflowDetails);
       }

@@ -174,11 +174,7 @@ class WorkflowPreviewPage extends ConsumerWidget {
                             );
                           }
                         } else if (finalState.error != null) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Error: ${finalState.error}')),
-                            );
-                          }
+                          debugPrint('Error approving workflow: ${finalState.error}');
                         }
                       },
                 child: const Text('Approve & Activate'),

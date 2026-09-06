@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 enum IntegrationServiceType {
   google,
   slack,
+  make,
 }
 
 @immutable
@@ -13,6 +14,7 @@ class IntegrationAccount {
   final IntegrationServiceType serviceType;
   final bool isConnected;
   final DateTime connectedAt;
+  final String? accessToken;
 
   const IntegrationAccount({
     required this.id,
@@ -21,10 +23,36 @@ class IntegrationAccount {
     required this.serviceType,
     this.isConnected = true,
     required this.connectedAt,
+    this.accessToken,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'email': email,
+      'displayName': displayName,
+      'serviceType': serviceType.name,
+      'isConnected': isConnected,
+      'connectedAt': connectedAt.toIso8601String(),
+      'accessToken': accessToken,
+    };
+  }
+
+  factory IntegrationAccount.fromJson(Map<String, dynamic> json) {
+    return IntegrationAccount(
+      id: json['id'],
+      email: json['email'],
+      displayName: json['displayName'],
+      serviceType: IntegrationServiceType.values.byName(json['serviceType']),
+      isConnected: json['isConnected'],
+      connectedAt: DateTime.parse(json['connectedAt']),
+      accessToken: json['accessToken'],
+    );
+  }
 
   IntegrationAccount copyWith({
     bool? isConnected,
+    String? accessToken,
   }) {
     return IntegrationAccount(
       id: id,
@@ -33,6 +61,7 @@ class IntegrationAccount {
       serviceType: serviceType,
       isConnected: isConnected ?? this.isConnected,
       connectedAt: connectedAt,
+      accessToken: accessToken ?? this.accessToken,
     );
   }
 }

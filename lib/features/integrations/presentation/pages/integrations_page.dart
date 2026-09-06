@@ -13,6 +13,14 @@ class IntegrationsPage extends ConsumerWidget {
     final accountsAsync = ref.watch(connectedAccountsProvider);
     final theme = Theme.of(context);
 
+    // Log error if connection fails
+    ref.listen(integrationActionsProvider, (previous, next) {
+      if (next is AsyncError) {
+        debugPrint('Integration Action Error: ${next.error}');
+        debugPrint('Stack trace: ${next.stackTrace}');
+      }
+    });
+
     return PageContainer(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,9 +48,9 @@ class IntegrationsPage extends ConsumerWidget {
           ),
           const SizedBox(height: AppLayout.spaceM),
           _IntegrationServiceTile(
-            name: 'Google (Gmail, Sheets)',
-            icon: Icons.account_circle,
-            onConnect: () => ref.read(integrationActionsProvider.notifier).connectGoogle(),
+            name: 'Make.com (Integromat)',
+            icon: Icons.bolt,
+            onConnect: () => _showMakeTokenDialog(context, ref),
           ),
           const SizedBox(height: AppLayout.spaceXL),
 
@@ -80,9 +88,49 @@ class IntegrationsPage extends ConsumerWidget {
       ),
     );
   }
+
+  void _showMakeTokenDialog(BuildContext context, WidgetRef ref) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Connect Make.com'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Enter your Make API Token (v2). You can find it in your Profile > API settings.'),
+            const SizedBox(height: AppLayout.spaceM),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'API Token',
+                border: OutlineInputBorder(),
+              ),
+              obscureText: true,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (controller.text.isNotEmpty) {
+                ref.read(integrationActionsProvider.notifier).connectMake(controller.text);
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Connect'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _IntegrationServiceTile extends StatelessWidget {
+class _IntegrationServiceTile extends ConsumerWidget {
   final String name;
   final IconData icon;
   final VoidCallback onConnect;
@@ -94,16 +142,21 @@ class _IntegrationServiceTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final actionsState = ref.watch(integrationActionsProvider);
+    final isLoading = actionsState.isLoading;
+
     return Card(
       child: ListTile(
         leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
         title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
         trailing: SizedBox(
-          width: 100,
+          width: 120,
           child: ElevatedButton(
-            onPressed: onConnect,
-            child: const Text('Connect'),
+            onPressed: isLoading ? null : onConnect,
+            child: isLoading 
+                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Text('Connect'),
           ),
         ),
       ),

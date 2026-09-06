@@ -248,11 +248,7 @@ class _RunNowButton extends ConsumerWidget {
                   context.push(AppRoutes.executionDetails.replaceFirst(':id', state.value!));
                 }
               } else if (state.hasError) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: ${state.error}')),
-                  );
-                }
+                debugPrint('Error running automation: ${state.error}');
               }
             },
       icon: isLoading

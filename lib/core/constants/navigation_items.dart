@@ -7,12 +7,6 @@ class AppNavigation {
 
   static const List<NavigationItem> mainNavigationItems = [
     NavigationItem(
-      label: 'Dashboard',
-      icon: Icons.dashboard_outlined,
-      selectedIcon: Icons.dashboard,
-      routePath: AppRoutes.dashboard,
-    ),
-    NavigationItem(
       label: 'Automations',
       icon: Icons.auto_fix_high_outlined,
       selectedIcon: Icons.auto_fix_high,
@@ -35,12 +29,6 @@ class AppNavigation {
       icon: Icons.extension_outlined,
       selectedIcon: Icons.extension,
       routePath: AppRoutes.integrations,
-    ),
-    NavigationItem(
-      label: 'Settings',
-      icon: Icons.settings_outlined,
-      selectedIcon: Icons.settings,
-      routePath: AppRoutes.settings,
     ),
   ];
 }

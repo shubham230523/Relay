@@ -28,20 +28,13 @@ class _MobileShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Mobile items: Dashboard, Automations, Executions, Settings
-    // We need to map these to the actual branch indices: 0, 1, 2, 5
-    final mobileItems = [
-      AppNavigation.mainNavigationItems[0], // Dashboard
-      AppNavigation.mainNavigationItems[1], // Automations
-      AppNavigation.mainNavigationItems[2], // Executions
-      AppNavigation.mainNavigationItems[5], // Settings
-    ];
-
-    final branchIndices = [0, 1, 2, 5];
+    // Mobile items: Automations, Executions, Templates, Integrations
+    final mobileItems = AppNavigation.mainNavigationItems;
+    final branchIndices = List.generate(mobileItems.length, (index) => index);
 
     // Find if current index is in our mobile set
-    int selectedIndex = branchIndices.indexOf(navigationShell.currentIndex);
-    if (selectedIndex == -1) selectedIndex = 0;
+    int selectedIndex = navigationShell.currentIndex;
+    if (selectedIndex >= mobileItems.length) selectedIndex = 0;
 
     return Scaffold(
       body: navigationShell,

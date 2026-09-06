@@ -1,37 +1,25 @@
-# Fix Layout Assertion and Import Consistency
+# Fix Compilation Errors in Google Sign-In Integration
 
-The goal is to fix the `Trailing widget consumes the entire tile width` assertion error occurring on the Integrations page and ensure layout robustness across the app.
-
-## User Review Required
-
-> [!IMPORTANT]
-> I will be modifying the global `AppTheme` to change how buttons are sized by default. This might affect other screens where buttons were relying on `Size.fromHeight(48)` to expand. I will ensure they are wrapped appropriately if needed.
+The goal is to fix the compilation errors caused by incorrect parameters in `GoogleSignIn.instance.initialize` and missing imports.
 
 ## Proposed Changes
 
-### Core & Theme
+### Core Services
 
-#### [MODIFY] [page_container.dart](file:///C:/Users/shubham/Documents/Flutter1/relay/lib/core/widgets/page_container.dart)
-- Revert `SizedBox` to `ConstrainedBox` for `maxWidth`. Using `SizedBox` with a fixed width forces the child to be that wide even if the screen is smaller, which leads to layout issues.
-
-#### [MODIFY] [app_theme.dart](file:///C:/Users/shubham/Documents/Flutter1/relay/lib/core/theme/app_theme.dart)
-- Update `elevatedButtonTheme` and `outlinedButtonTheme` to use `minimumSize: const Size(0, 48)` instead of `Size.fromHeight(48)`. While `Size.fromHeight(48)` should mean `Size(0, 48)`, explicitly setting it avoids any ambiguity in Material 3's complex layout logic.
+#### [MODIFY] [integration_service.dart](file:///C:/Users/shubham/Documents/Flutter1/relay/lib/core/services/integration_service.dart)
+- Remove the `scopes` parameter from the `initialize` call as it is not supported in the current version of the plugin.
 
 ### Features
 
-#### [MODIFY] [integrations_page.dart](file:///C:/Users/shubham/Documents/Flutter1/relay/lib/features/integrations/presentation/pages/integrations_page.dart)
-- Wrap `ListTile` trailing widgets in a `SizedBox` or `Row(mainAxisSize: min)` to ensure they don't try to occupy more space than they should.
-
-#### [MODIFY] [mock_automation_repository.dart](file:///C:/Users/shubham/Documents/Flutter1/relay/lib/features/automations/data/repositories/mock_automation_repository.dart)
-- Fix any remaining relative imports and ensure unique IDs for mock data.
+#### [MODIFY] [real_integration_repository.dart](file:///C:/Users/shubham/Documents/Flutter1/relay/lib/features/integrations/data/repositories/real_integration_repository.dart)
+- Add `import 'package:flutter/foundation.dart';` to resolve the `debugPrint` error.
+- Remove the `scopes` parameter from the `initialize` call.
+- Pass `ApiConstants.googleScopes` as `scopeHint` to the `authenticate` method to ensure the required permissions are requested.
 
 ## Verification Plan
 
-### Automated Tests
-- N/A (Manual UI verification required for layout issues)
-
 ### Manual Verification
 - Run `flutter run -d chrome`.
-- Go to the **Integrations** page.
-- Check for errors in the console.
-- Resize the browser window to see if the layout adapts without assertions.
+- Verify the app compiles and launches successfully.
+- Go to **Integrations** and click **Connect**.
+- Confirm that the Google Sign-In prompt appears and correctly requests access to Gmail and Sheets.

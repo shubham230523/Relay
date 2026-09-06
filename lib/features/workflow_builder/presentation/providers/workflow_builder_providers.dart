@@ -1,18 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../automations/domain/models/models.dart';
 import '../../../automations/presentation/providers/automation_providers.dart';
-import '../../data/repositories/mock_workflow_repository.dart';
-import '../../data/services/mock_workflow_planner.dart';
+import '../../data/repositories/empty_workflow_repository.dart';
+import '../../data/services/empty_workflow_planner.dart';
 import '../../domain/models/models.dart';
 import '../../domain/repositories/workflow_repository.dart';
 import '../../domain/services/workflow_planner.dart';
 
 final workflowPlannerProvider = Provider<WorkflowPlanner>((ref) {
-  return MockWorkflowPlanner();
+  return EmptyWorkflowPlanner();
 });
 
 final workflowRepositoryProvider = Provider<WorkflowRepository>((ref) {
-  return MockWorkflowRepository();
+  return EmptyWorkflowRepository();
 });
 
 class WorkflowGenerationState {

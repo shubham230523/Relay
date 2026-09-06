@@ -1,8 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:relay/core/services/services.dart';
-import '../../data/repositories/mock_execution_repository.dart';
-import '../../data/services/mock_recovery_agent.dart';
-import '../../data/services/mock_workflow_execution_simulator.dart';
+import '../../../workflow_builder/domain/models/models.dart';
+import '../../data/repositories/empty_execution_repository.dart';
 import '../../data/services/real_workflow_executor.dart';
 import '../../domain/models/models.dart';
 import '../../domain/repositories/execution_repository.dart';
@@ -10,13 +9,22 @@ import '../../domain/services/services.dart';
 import 'package:relay/features/automations/presentation/providers/automation_providers.dart';
 
 final executionRepositoryProvider = Provider<ExecutionRepository>((ref) {
-  return MockExecutionRepository();
+  return EmptyExecutionRepository();
 });
 
+// Placeholder simulator since we are moving away from mocks
+class EmptyWorkflowExecutionSimulator implements WorkflowExecutionSimulator {
+  @override
+  Future<String> simulate(String automationId, Workflow workflow, {ExecutionFailureConfig failureConfig = ExecutionFailureConfig.none}) async {
+    return 'empty_execution';
+  }
+
+  @override
+  Future<void> retry(String executionId, Workflow workflow) async {}
+}
+
 final workflowExecutionSimulatorProvider = Provider<WorkflowExecutionSimulator>((ref) {
-  final repo = ref.watch(executionRepositoryProvider);
-  final notificationService = ref.watch(notificationServiceProvider);
-  return MockWorkflowExecutionSimulator(repo, notificationService);
+  return EmptyWorkflowExecutionSimulator();
 });
 
 final workflowExecutorProvider = Provider<WorkflowExecutor>((ref) {
@@ -37,8 +45,25 @@ final workflowExecutorProvider = Provider<WorkflowExecutor>((ref) {
   );
 });
 
+// Placeholder recovery agent
+class EmptyRecoveryAgent implements RecoveryAgent {
+  @override
+  Future<FailureAnalysis> analyzeFailure(Execution execution, List<ExecutionStep> steps) async {
+    return const FailureAnalysis(
+      rootCause: 'Unknown',
+      explanation: 'No analysis available.',
+      suggestedAction: 'Check logs for details.',
+      canAutoRecover: false,
+      confidence: 0.0,
+    );
+  }
+
+  @override
+  Future<void> attemptRecovery(Execution execution, FailureAnalysis analysis) async {}
+}
+
 final recoveryAgentProvider = Provider<RecoveryAgent>((ref) {
-  return MockRecoveryAgent();
+  return EmptyRecoveryAgent();
 });
 
 class ExecutionActionsNotifier extends StateNotifier<AsyncValue<void>> {

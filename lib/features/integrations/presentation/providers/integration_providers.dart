@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/real_integration_repository.dart';
 import '../../domain/models/models.dart';
@@ -23,6 +24,19 @@ class IntegrationActionsNotifier extends StateNotifier<AsyncValue<void>> {
       await _repository.connectGoogleAccount();
       state = const AsyncValue.data(null);
     } catch (e, st) {
+      debugPrint('Error connecting Google account: $e');
+      debugPrint('Stack trace: $st');
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  Future<void> connectMake(String token) async {
+    state = const AsyncValue.loading();
+    try {
+      await _repository.connectMakeAccount(token);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      debugPrint('Error connecting Make account: $e');
       state = AsyncValue.error(e, st);
     }
   }
@@ -33,6 +47,8 @@ class IntegrationActionsNotifier extends StateNotifier<AsyncValue<void>> {
       await _repository.disconnectAccount(id);
       state = const AsyncValue.data(null);
     } catch (e, st) {
+      debugPrint('Error disconnecting account: $e');
+      debugPrint('Stack trace: $st');
       state = AsyncValue.error(e, st);
     }
   }

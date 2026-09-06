@@ -1,13 +1,32 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../executions/presentation/providers/execution_providers.dart';
+import '../../../integrations/domain/models/models.dart';
+import '../../../integrations/presentation/providers/integration_providers.dart';
 import '../../../workflow_builder/domain/models/models.dart';
 import '../../../workflow_builder/presentation/providers/workflow_builder_providers.dart';
-import '../../data/repositories/mock_automation_repository.dart';
+import '../../data/repositories/empty_automation_repository.dart';
+import '../../data/repositories/make_automation_repository.dart';
 import '../../domain/models/models.dart';
 import '../../domain/repositories/automation_repository.dart';
 
 final automationRepositoryProvider = Provider<AutomationRepository>((ref) {
-  return MockAutomationRepository();
+  final accounts = ref.watch(connectedAccountsProvider).value ?? [];
+  final makeAccount = accounts.firstWhere(
+    (a) => a.serviceType == IntegrationServiceType.make && a.accessToken != null,
+    orElse: () => IntegrationAccount(
+      id: '',
+      email: '',
+      displayName: '',
+      serviceType: IntegrationServiceType.google,
+      connectedAt: DateTime(2000),
+    ),
+  );
+
+  if (makeAccount.id.isNotEmpty) {
+    return MakeAutomationRepository(apiToken: makeAccount.accessToken!);
+  }
+
+  return EmptyAutomationRepository();
 });
 
 final automationsListProvider = FutureProvider<List<Automation>>((ref) async {
